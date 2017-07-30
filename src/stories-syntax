@@ -1,0 +1,44 @@
+Narrative
+Character: speech
+Character: _thoughts (italic)_
+Character: *thoughts (italic)*
+?[Question1]Character: What to do?
+?(5s)[Question1]Character: What to do, quick?
+  *ans1: This thing
+  *ans2: That thing
+  *ans3: Other thing
+:ans1?
+    :var++
+    Do something
+:Question1=ans1?
+    :var++
+    Do something
+:var>2?
+    :var=0
+?[profile]: Choose picture
+  *pic1: image1.jpg
+  *pic2: image2.jpg
+?[imagequestion]Character: Pick one
+  *img1: image1.jpg
+
+--
+[textvar]
+:avatar=pic.jpg
+:avatar=profile
+:name=textvar
+:background=other.jpg
+:label:
+:>label
+
+
+
+statement types:
+narrative
+-speech
+question
+-timed question
+-picture question
+answer
+-picture answer
+variable manipulation
+text input
