@@ -68,4 +68,24 @@ public class BasicTerminalDisplay implements DisplayProvider {
         Scanner in = new Scanner(System.in);
         return in.nextLine();
     }
+
+    @Override
+    public void onChapterBegin(int chapterNo, String chapterName) {
+        System.out.println("Chapter " + chapterNo + ": " + chapterName);
+    }
+
+    @Override
+    public void onChapterEnd(int chapterNo, String chapterName) {
+        System.out.println("Finished chapter " + chapterNo + ": " + chapterName);
+    }
+
+    @Override
+    public void onBookBegin(String bookName) {
+        System.out.println("Book " + bookName);
+    }
+
+    @Override
+    public void onBookEnd(String bookName) {
+        System.out.println("The end of book " + bookName);
+    }
 }

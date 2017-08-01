@@ -5,10 +5,16 @@ import net.objecthunter.exp4j.function.Functions;
 import rs.luka.stories.Utils;
 import rs.luka.stories.environment.FileProvider;
 import rs.luka.stories.exceptions.InterpretationException;
+import rs.luka.stories.exceptions.LoadingException;
 import rs.luka.stories.parser.Type;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -22,18 +28,40 @@ public class State implements VariableProvider {
 
     private static class Value {
 
-        private Type type;
-        private Object value;
+        private static final String SEP = "/";
+
+        private final Type type;
+        private final Object value;
 
         private Value(Type type, Object value) {
             if(type.typeClass.isInstance(type)) throw new ClassCastException("Mismatched value type: expected " + type.typeClass.getName() + ", got " + value);
             this.type = type;
             this.value = value;
         }
+
+        private Value(String fromString) {
+            String[] fields = fromString.split(SEP, 2);
+            type = Type.getByMark(fields[0]);
+            if(type == null) throw new LoadingException("State file is corrupted: invalid type mark " + fields[0]);
+            switch (type) {
+                case STRING:
+                    value = fields[1];
+                    break;
+                case DOUBLE:
+                    value = Double.parseDouble(fields[1]);
+                    break;
+                default: value = null; //need to shut up the compiler
+            }
+        }
+
+        @Override
+        public String toString() {
+            return type.mark + SEP + value.toString();
+        }
     }
 
-    private Map<String, Value> variables = new HashMap<>();
 
+    private static final String SEP = ":";
     private static final Pattern INVALID_NAMES = Pattern.compile("^.*[&|%+*<>=/\\\\\\-]+.*$|(.*([?:])$)");
 
     public static void checkName(String name) throws InterpretationException {
@@ -44,6 +72,32 @@ public class State implements VariableProvider {
         if(Functions.getBuiltinFunction(name) != null)
             throw new InterpretationException("Variable name is a function name!");
     }
+
+    protected State() {
+
+    }
+
+    protected State(File file) throws IOException {
+        List<String> vars = Files.readAllLines(file.toPath());
+        for(String var : vars) {
+            String[] fields = var.split(SEP, 2);
+            Value val = new Value(fields[1]);
+            variables.put(fields[0], val);
+        }
+    }
+
+    protected void saveToFile(File file) throws IOException {
+        BufferedWriter out = new BufferedWriter(new FileWriter(file));
+        for(Map.Entry<String, Value> e : variables.entrySet()) {
+            out.write(e.getKey());
+            out.write(SEP);
+            out.write(e.getValue().toString());
+            out.write("\n");
+        }
+        out.close();
+    }
+
+    private Map<String, Value> variables = new HashMap<>();
 
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
@@ -83,6 +137,12 @@ public class State implements VariableProvider {
         if(var == null) return null;
         if(var.type == Type.DOUBLE) return (Double)var.value;
         else return Double.NaN;
+    }
+
+    public Double getOrDefault(String name, double value) {
+        Double val = getDouble(name);
+        if(val==null || val == Double.NaN) return value;
+        else return val;
     }
 
     public Set<String> getVariableNames() {

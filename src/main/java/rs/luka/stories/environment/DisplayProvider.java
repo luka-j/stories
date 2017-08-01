@@ -45,4 +45,12 @@ public interface DisplayProvider {
      * @return entered text
      */
     String showInput(String hint);
+
+    void onChapterBegin(int chapterNo, String chapterName);
+
+    void onChapterEnd(int chapterNo, String chapterName);
+
+    void onBookBegin(String bookName);
+
+    void onBookEnd(String bookName);
 }
