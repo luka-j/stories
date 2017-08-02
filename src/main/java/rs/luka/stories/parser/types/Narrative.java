@@ -1,5 +1,6 @@
 package rs.luka.stories.parser.types;
 
+import rs.luka.stories.parser.Expressions;
 import rs.luka.stories.runtime.Chapter;
 
 /**
@@ -15,6 +16,7 @@ public class Narrative extends Line {
 
     @Override
     public Line execute() {
+        text = Expressions.substituteVariables(text, chapter.getState());
         chapter.getDisplay().showNarrative(text);
         return nextLine;
     }

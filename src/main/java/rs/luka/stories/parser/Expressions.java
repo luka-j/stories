@@ -65,4 +65,28 @@ public class Expressions {
                 .setVariableProvider(state)
                 .evaluate();
     }
+
+    public static String substituteVariables(String expression, State state) {
+        StringBuilder res = new StringBuilder(), var = new StringBuilder();
+        boolean isVariable = false;
+        for(int i=0; i<expression.length(); i++) {
+            char ch = expression.charAt(i);
+            if(!isVariable) {
+                if(ch == '[')
+                    isVariable = true;
+                else
+                    res.append(ch);
+            } else {
+                if(ch == ']') {
+                    String varStr = var.toString();
+                    if(state.hasVariable(varStr)) res.append(state.getString(varStr));
+                    else res.append('[').append(var).append(']');
+                    isVariable = false;
+                } else {
+                    var.append(ch);
+                }
+            }
+        }
+        return res.toString();
+    }
 }

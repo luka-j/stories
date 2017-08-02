@@ -30,7 +30,7 @@ public class PictureAnswer implements AnswerLike {
     }
 
     @Override
-    public Object getContent() {
+    public Object getContent(State state) {
         return getPicture();
     }
 }

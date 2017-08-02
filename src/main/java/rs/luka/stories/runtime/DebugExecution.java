@@ -7,7 +7,7 @@ import rs.luka.stories.exceptions.InterpretationException;
 public class DebugExecution {
     public static void run() {
         Runtime runtime = new Runtime(new LinuxDebugFiles(), new BasicTerminalDisplay());
-        runtime.loadBook("test");
+        runtime.loadBook("sample");
         try {
             System.out.println("\n\nRUNNING BOOK\n\n");
             runtime.restartBook();

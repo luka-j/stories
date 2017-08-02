@@ -1,6 +1,7 @@
 package rs.luka.stories.parser.types;
 
 import rs.luka.stories.exceptions.InterpretationException;
+import rs.luka.stories.parser.Expressions;
 import rs.luka.stories.runtime.Chapter;
 import rs.luka.stories.runtime.State;
 
@@ -20,6 +21,7 @@ public class Speech extends Line {
 
     @Override
     public Line execute() {
+        text = Expressions.substituteVariables(text, chapter.getState());
         chapter.getDisplay().showSpeech(character, getAvatar(character), text);
         return nextLine;
     }

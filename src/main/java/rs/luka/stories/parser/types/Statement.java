@@ -19,6 +19,7 @@ public abstract class Statement extends Line {
         if(statement.endsWith(":")) {
             LabelStatement stmt = new LabelStatement(chapter, statement, indent);
             chapter.addLabel(stmt.getLabel(), stmt);
+            return stmt;
         }
         if(statement.startsWith(">"))
             return new GotoStatement(chapter, statement, indent);

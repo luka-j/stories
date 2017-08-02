@@ -17,13 +17,19 @@ public class Question extends Line {
     protected String character;
     protected List<AnswerLike> answers = new ArrayList<>();
     private boolean containsPictures;
+    private double time;
 
     public Question(Chapter chapter, String variable, String text, String character, int indent) throws InterpretationException {
+        this(chapter, variable, text, character, 0, indent);
+    }
+
+    protected Question(Chapter chapter, String variable, String text, String character, double time, int indent) throws InterpretationException {
         super(chapter, indent);
         State.checkName(variable);
         this.variable = variable;
         this.text = text;
         this.character = character;
+        this.time = time;
     }
 
     @Override
@@ -49,14 +55,14 @@ public class Question extends Line {
 
     protected int displayQuestion() {
         String[] answers = new String[this.answers.size()];
-        for(int i = 0; i< this.answers.size(); i++) answers[i] = this.answers.get(i).getContent().toString();
-        return chapter.getDisplay().showQuestion(text, character, getAvatar(character), 0, answers);
+        for(int i = 0; i< this.answers.size(); i++) answers[i] = this.answers.get(i).getContent(chapter.getState()).toString();
+        return chapter.getDisplay().showQuestion(text, character, getAvatar(character), time, answers);
     }
 
     protected int displayPictureQuestion() {
         File[] answers = new File[this.answers.size()];
         for(int i = 0; i< this.answers.size(); i++) answers[i] = ((PictureAnswer) this.answers.get(i)).getPicture();
-        return chapter.getDisplay().showPictureQuestion(text, character, getAvatar(character), 0, answers);
+        return chapter.getDisplay().showPictureQuestion(text, character, getAvatar(character), time, answers);
     }
 
     public void addAnswer(Answer answer) throws InterpretationException {

@@ -1,6 +1,7 @@
 package rs.luka.stories.parser.types;
 
 import rs.luka.stories.exceptions.InterpretationException;
+import rs.luka.stories.parser.Expressions;
 import rs.luka.stories.runtime.State;
 
 /**
@@ -21,11 +22,11 @@ public class Answer implements AnswerLike {
     }
 
     @Override
-    public Object getContent() {
-        return getText();
+    public Object getContent(State state) {
+        return getText(state);
     }
 
-    public String getText() {
-        return text;
+    public String getText(State state) {
+        return Expressions.substituteVariables(text, state);
     }
 }

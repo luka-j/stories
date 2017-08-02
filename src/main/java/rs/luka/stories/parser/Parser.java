@@ -89,11 +89,36 @@ public class Parser {
             @Override
             public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
                 String[] parts = line.trim().split("\\s*]\\s*", 2);
-                return new TextInput(chapter, parts[0].substring(1), parts[2], Utils.countLeadingSpaces(line));
+                return new TextInput(chapter, parts[0].substring(1), parts[1], Utils.countLeadingSpaces(line));
+            }
+        },
+        COMMENT {
+            @Override
+            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
+                return null; //this is a no-op
             }
         };
 
         public abstract Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException;
+
+
+        public static LineType getType(String line, State state) throws InterpretationException {
+            line = line.trim();
+            if(line.isEmpty()) throw new InterpretationException("Empty line");
+            if(line.startsWith("//"))
+                return COMMENT;
+            if(line.startsWith(":"))
+                return STATEMENT;
+            if(line.startsWith("?"))
+                return QUESTION;
+            if(line.startsWith("*"))
+                return ANSWER;
+            if(line.startsWith("[") && line.contains("]"))
+                return INPUT;
+            if(line.contains(":") && state.getString(line.split(":", 2)[0]) != null)
+                return SPEECH;
+            return NARRATIVE;
+        }
     }
 
     private Question previousQuestion;
@@ -101,21 +126,7 @@ public class Parser {
     private Line head;
     private boolean finished = false;
 
-    public LineType getType(String line, State state) throws InterpretationException {
-        line = line.trim();
-        if(line.isEmpty()) throw new InterpretationException("Empty line");
-        if(line.startsWith(":"))
-            return STATEMENT;
-        if(line.startsWith("?"))
-            return QUESTION;
-        if(line.startsWith("*"))
-            return ANSWER;
-        if(line.startsWith("[") && line.contains("]"))
-            return INPUT;
-        if(line.contains(":") && state.getString(line.split(":", 2)[0]) != null)
-            return SPEECH;
-        return NARRATIVE;
-    }
+
 
     public Line parse(List<String> lines, Chapter chapter) throws InterpretationException {
         for(String line : lines) parse(line, chapter);
@@ -123,8 +134,12 @@ public class Parser {
         return getHead();
     }
 
-    private Line parse(String line, Chapter chapter) throws InterpretationException {
+    private void parse(String line, Chapter chapter) throws InterpretationException {
         LineType type = getType(line, chapter.getState());
+        if(type == COMMENT) return;
+
+        int commIndex = line.indexOf("//");
+        if(commIndex >= 0) line = line.substring(0, commIndex);
         Line current;
         if(type == ANSWER) {
             current = type.parse(line, chapter, previousQuestion);
@@ -137,7 +152,7 @@ public class Parser {
         //todo improve parsing (move Question#nextLine setting to jumps)
         previousLine = current;
         if(current instanceof Question) previousQuestion = (Question) current;
-        return current;
+        //return current;
     }
 
     public Line getHead() {
@@ -151,6 +166,7 @@ public class Parser {
         boolean inside = false;
         IfStatement conditional = null;
         while(curr != null) {
+            Line next = curr.getNextLine();
             if(curr instanceof GotoStatement) {
                 ((GotoStatement)curr).setJump(chapter);
             }
@@ -168,7 +184,7 @@ public class Parser {
                 }
             }
 
-            curr = curr.getNextLine();
+            curr = next;
         }
         finished = true;
     }

@@ -75,7 +75,7 @@ public class BasicTerminalDisplay implements DisplayProvider {
 
     @Override
     public void onChapterBegin(int chapterNo, String chapterName) {
-        System.out.println("Chapter " + chapterNo + ": " + chapterName);
+        System.out.println("\nChapter " + chapterNo + ": " + chapterName);
     }
 
     @Override
