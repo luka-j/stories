@@ -11,6 +11,7 @@ import rs.luka.stories.parser.types.Line;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class Book {
     private String name;
     private FileProvider files;
     private DisplayProvider display;
-    private List<File> chapters;
+    private List<File> chapters = new ArrayList<>();
     private State state;
     private File stateFile;
 
@@ -37,17 +38,17 @@ public class Book {
         stateFile = new File(sourceDir, STATE_FILENAME);
 
         Arrays.sort(children, Utils.enumeratedStringsComparator);
-        int last = children.length-1;
         if(stateFile.isFile()) {
             try {
-                state = new State(new File(sourceDir, children[last]));
+                state = new State(stateFile);
             } catch (IOException e) {
                 throw new LoadingException("Failed to load initial state", e);
             }
         }
-        if(state == null)
+        if(state == null) {
             state = new State();
-        for(int i=0; i<last; i++) //ignoring stateFile - chapter sources will come first
+        }
+        for(int i=1; i<children.length; i++) //ignoring stateFile - it is at [0]
             chapters.add(new File(sourceDir, children[i]));
     }
 
@@ -69,11 +70,11 @@ public class Book {
         try {
             state.setVariable(CURRENT_CHAPTER, current + 1);
             state.saveToFile(stateFile);
-            display.onChapterEnd(current, getChapterName(current));
-            if(current > chapters.size())
+            display.onChapterEnd(current, getChapterName(current-1));
+            if(current >= chapters.size())
                 display.onBookEnd(name);
         } catch (InterpretationException e) {
-            throw new ExecutionException("Unexpected: cannot set next chapter");
+            throw new ExecutionException("Unexpected: cannot set next chapter", e);
         } catch (IOException e) {
             throw new LoadingException("Cannot save stateFile after finishing chapter");
         }
@@ -87,16 +88,16 @@ public class Book {
      */
     private Line startFrom(int chapterNo) throws InterpretationException {
         chapterNo--;
-        if(chapters.size() >= chapterNo) return null;
+        if(chapters.size() <= chapterNo) return null;
 
         File source = chapters.get(chapterNo);
         String chapterName = getChapterName(chapterNo);
         try {
             Chapter chapter = new Chapter(chapterName, this, state, display, source);
             Line begin = chapter.compile();
-            if(chapterNo == 1)
+            if(chapterNo == 0)
                 display.onBookBegin(name);
-            display.onChapterBegin(chapterNo, chapterName);
+            display.onChapterBegin(chapterNo+1, chapterName);
 
             return begin;
         } catch (FileNotFoundException e) {

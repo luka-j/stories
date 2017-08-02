@@ -1,5 +1,6 @@
 package rs.luka.stories.parser.types;
 
+import rs.luka.stories.parser.Expressions;
 import rs.luka.stories.parser.Type;
 import rs.luka.stories.runtime.Chapter;
 
@@ -17,7 +18,7 @@ public class IfStatement extends Statement {
 
     @Override
     public Line execute() {
-        if(Type.isTruthy(AssignStatement.eval(expression, chapter.getState())))
+        if(Type.isTruthy(Expressions.eval(expression, chapter.getState())))
             return nextLine;
         else
             return endIf;

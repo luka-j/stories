@@ -52,4 +52,8 @@ public class Runtime {
         current = book.resumeBook();
         return current != null;
     }
+
+    public void endChapter() throws InterpretationException {
+        book.endChapter();
+    }
 }

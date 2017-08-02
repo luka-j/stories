@@ -1,14 +1,28 @@
 group 'rs.luka'
 
 apply plugin: 'java'
+apply plugin: 'application'
 
 sourceCompatibility = 1.8
+mainClassName='rs.luka.stories.Main'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile project(':exp4j')
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+run {
+    standardInput = System.in
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'rs.luka.stories.Main'
+        )
+    }
 }

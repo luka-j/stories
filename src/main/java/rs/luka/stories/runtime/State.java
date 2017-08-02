@@ -65,7 +65,7 @@ public class State implements VariableProvider {
     private static final Pattern INVALID_NAMES = Pattern.compile("^.*[&|%+*<>=/\\\\\\-]+.*$|(.*([?:])$)");
 
     public static void checkName(String name) throws InterpretationException {
-        if(!Character.isLetter(name.charAt(0)))
+        if(!Character.isLetter(name.charAt(0)) && name.charAt(0) != '_')
             throw new InterpretationException("Variable name doesn't start with a letter!");
         if(INVALID_NAMES.matcher(name).matches())
             throw new InterpretationException("Variable name is invalid (contains +, %, *, =, /, \\, -, or ? or : at the end)");
@@ -120,6 +120,7 @@ public class State implements VariableProvider {
 
     public String getString(String name) {
         if(Utils.isDouble(name)) return name;
+        if(!variables.containsKey(name)) return null;
         return variables.get(name).value.toString();
     }
 

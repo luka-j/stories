@@ -10,8 +10,13 @@ public enum Type {
         this.mark = mark;
     }
 
-    public static boolean isTruthy(Double value) {
-        return value != null && value != 0 && value != Double.NaN;
+    public static boolean isTruthy(Object value) {
+        if(value instanceof Double) {
+            Double doubleVal = (Double)value;
+            return doubleVal != 0 && doubleVal != Double.NaN;
+        } else {
+            return false; //this can be thought about... later
+        }
     }
 
     public static Type getByMark(String mark) {

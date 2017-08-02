@@ -10,12 +10,16 @@ import java.util.Scanner;
 public class BasicTerminalDisplay implements DisplayProvider {
     @Override
     public void showNarrative(String text) {
-        System.out.println(text);
+        System.out.print(text);
+        System.out.flush();
+        new Scanner(System.in).nextLine();
     }
 
     @Override
     public void showSpeech(String character, File avatar, String text) {
-        System.out.println(character + ": " + text);
+        System.out.print(character + ": " + text);
+        System.out.flush();
+        new Scanner(System.in).nextLine();
     }
 
     @Override
@@ -41,7 +45,7 @@ public class BasicTerminalDisplay implements DisplayProvider {
             }
 
             try {
-                return in.nextInt();
+                return in.nextInt()-1;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input");
                 if(time > 0) return -1;

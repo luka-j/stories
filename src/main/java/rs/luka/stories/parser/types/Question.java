@@ -5,6 +5,7 @@ import rs.luka.stories.runtime.Chapter;
 import rs.luka.stories.runtime.State;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class Question extends Line {
     protected String variable;
     protected String text;
     protected String character;
-    protected List<AnswerLike> answers;
+    protected List<AnswerLike> answers = new ArrayList<>();
     private boolean containsPictures;
 
     public Question(Chapter chapter, String variable, String text, String character, int indent) throws InterpretationException {
@@ -28,13 +29,18 @@ public class Question extends Line {
     @Override
     public Line execute() {
         String chosen; //todo what happens if time's up and user hasn't selected the answer, so index is -1 ?
+        int chosenIndex;
         if(containsPictures)
-            chosen = answers.get(displayPictureQuestion()).getVariable();
+            chosenIndex = displayPictureQuestion();
         else
-            chosen = answers.get(displayQuestion()).getVariable();
+            chosenIndex = displayQuestion();
+        chosen = answers.get(chosenIndex).getVariable();
         try {
             chapter.getState().setVariable(variable, chosen);
             chapter.getState().setFlag(chosen);
+            for(int i=0; i<answers.size(); i++)
+                if(i != chosenIndex)
+                    chapter.getState().setVariable(answers.get(i).getVariable(), false);
         } catch (InterpretationException ex) {
             throw new RuntimeException("Caught unhandled InterpretationException in Quesiton#execute!", ex);
         }
