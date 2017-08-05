@@ -21,6 +21,7 @@ import net.objecthunter.exp4j.operator.Operator;
 import net.objecthunter.exp4j.tokenizer.*;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -56,7 +57,7 @@ public class Expression {
     }
 
     Expression(final Token[] tokens) {
-        this(tokens, Collections.emptySet());
+        this(tokens, Collections.<String>emptySet());
     }
 
     Expression(final Token[] tokens, Set<String> userFunctionNames) {
@@ -162,7 +163,12 @@ public class Expression {
     }
 
     public Future<Double> evaluateAsync(ExecutorService executor) {
-        return executor.submit(this::evaluate);
+        return executor.submit(new Callable<Double>() {
+            @Override
+            public Double call() {
+                return evaluate();
+            }
+        });
     }
 
     public double evaluate() {

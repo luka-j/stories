@@ -1,11 +1,11 @@
-group 'rs.luka'
+group 'rs.lukaj'
 version '0.1-alpha'
 
 apply plugin: 'java'
 apply plugin: 'application'
 
-sourceCompatibility = 1.8
-mainClassName='rs.luka.stories.Main'
+sourceCompatibility = 1.7
+mainClassName='rs.lukaj.stories.Main'
 
 repositories {
     mavenCentral()
