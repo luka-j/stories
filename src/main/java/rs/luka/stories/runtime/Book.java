@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Book {
-    private static final String STATE_FILENAME = "state";
+    private static final String STATE_FILENAME = ".state";
     private static final String CURRENT_CHAPTER = "__chapter__";
 
     private String name;
@@ -50,9 +50,9 @@ public class Book {
         this.display = display;
         File sourceDir = files.getSourceDirectory(name);
         if(!sourceDir.isDirectory()) throw new LoadingException("Cannot find book source directory at " + sourceDir.getAbsolutePath());
-        String[] children = sourceDir.list();
+        String[] children = sourceDir.list((dir, name1) -> name1.endsWith(".ch") && Character.isDigit(name1.charAt(0)));
         if(children == null || children.length == 0)
-            throw new LoadingException("Cannot list() sources in source directory");
+            throw new LoadingException("Cannot list() sources in source directory or there are no valid sources");
         stateFile = new File(sourceDir, STATE_FILENAME);
 
         Arrays.sort(children, Utils.enumeratedStringsComparator);
@@ -66,7 +66,7 @@ public class Book {
         if(state == null) {
             state = new State();
         }
-        for(int i=1; i<children.length; i++) //ignoring stateFile - it is at [0]
+        for(int i=0; i<children.length; i++)
             chapters.add(new File(sourceDir, children[i]));
     }
 

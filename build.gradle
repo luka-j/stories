@@ -1,4 +1,5 @@
 group 'rs.luka'
+version '0.1-alpha'
 
 apply plugin: 'java'
 apply plugin: 'application'

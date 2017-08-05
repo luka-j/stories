@@ -100,6 +100,7 @@ public class Expressions {
                     if(state.hasVariable(varStr)) res.append(state.getString(varStr));
                     else res.append('[').append(var).append(']');
                     isVariable = false;
+                    var.delete(0, var.length());
                 } else {
                     var.append(ch);
                 }

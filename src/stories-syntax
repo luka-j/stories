@@ -1,7 +1,5 @@
 Narrative
 Character: speech
-Character: _thoughts (italic)_
-Character: *thoughts (italic)*
 ?[Question1]Character: What to do?
 ?(5s)[Question1]Character: What to do, quick?
   *ans1: This thing
@@ -23,22 +21,9 @@ Character: *thoughts (italic)*
 
 --
 [textvar]
-:avatar=pic.jpg
-:avatar=profile
-:name=textvar
+:character=pic.jpg
+:textvar=whatever
+:result=5+3/2
 :background=other.jpg
 :label:
 :>label
-
-
-
-statement types:
-narrative
--speech
-question
--timed question
--picture question
-answer
--picture answer
-variable manipulation
-text input
