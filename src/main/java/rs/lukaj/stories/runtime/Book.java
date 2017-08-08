@@ -38,15 +38,9 @@ public class Book {
     private static final String STATE_FILENAME = ".state";
     private static final String CURRENT_CHAPTER = "__chapter__";
     private static final String METADATA_FILENAME = ".info";
-    private static final String AUTHOR_KEY = "author";
-    private static final String GENRES_KEY = "genres";
-    private static final String AUTHOR_ID_KEY = "authorId";
-    private static final String DATE_KEY = "date";
 
     private String name;
-    private String author;
-    private String genres;
-    private long authorId, date;
+    private State info;
 
     private FileProvider files;
     private DisplayProvider display;
@@ -90,11 +84,7 @@ public class Book {
         File infoFile = new File(sourceDir, METADATA_FILENAME);
         if(infoFile.isFile()) {
             try {
-                State info = new State(infoFile);
-                author = info.getString(AUTHOR_KEY);
-                authorId = info.getOrDefault(AUTHOR_ID_KEY, -1).longValue();
-                genres = info.getString(GENRES_KEY);
-                date = info.getOrDefault(DATE_KEY, -1).longValue();
+                info = new State(infoFile);
             } catch (IOException e) {
                 throw new LoadingException("Failed to load metadata", e);
             }
@@ -182,19 +172,7 @@ public class Book {
         return chapterNames;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public String getGenres() {
-        return genres;
-    }
-
-    public long getAuthorId() {
-        return authorId;
-    }
-
-    public long getDate() {
-        return date;
+    public State getBookInfo() {
+        return info;
     }
 }
