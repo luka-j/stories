@@ -30,8 +30,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +93,7 @@ public class State implements VariableProvider {
     }
 
     protected State(File file) throws IOException {
-        List<String> vars = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+        List<String> vars = Utils.readAllLines(file);
         for(String var : vars) {
             String[] fields = var.split(SEP, 2);
             Value val = new Value(fields[1]);

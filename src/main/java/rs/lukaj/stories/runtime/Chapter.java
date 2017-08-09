@@ -18,6 +18,7 @@
 
 package rs.lukaj.stories.runtime;
 
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.DisplayProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Parser;
@@ -26,8 +27,6 @@ import rs.lukaj.stories.parser.types.Line;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +51,7 @@ public class Chapter {
     }
 
     public Line compile() throws IOException, InterpretationException {
-        List<String> lines = Files.readAllLines(source.toPath(), StandardCharsets.UTF_8);
+        List<String> lines = Utils.readAllLines(source);
         Iterator<String> it = lines.iterator();
         while(it.hasNext())
             if(it.next().trim().isEmpty())

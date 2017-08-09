@@ -18,7 +18,13 @@
 
 package rs.lukaj.stories;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -75,5 +81,13 @@ public class Utils {
      */
     public static boolean isDouble(String str) {
         return DOUBLE_PATTERN.matcher(str).matches();
+    }
+
+    public static List<String> readAllLines(File f) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(f));
+        List<String> lines = new ArrayList<>();
+        String line;
+        while((line=reader.readLine()) != null) lines.add(line);
+        return lines;
     }
 }
