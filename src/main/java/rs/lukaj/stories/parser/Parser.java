@@ -36,7 +36,7 @@ public class Parser {
             public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
                 Question question = (Question)additionalParams[0];
                 if(question == null) throw new InterpretationException("Creating answer without the question");
-                String[] tokens = line.trim().substring(1).split("\\s*:\\s*", 2);
+                String[] tokens = line.trim().substring(2).split("\\s*]\\s*", 2);
                 if(chapter.imageExists(tokens[1])) {
                     PictureAnswer ans = new PictureAnswer(tokens[0], chapter.getImage(tokens[1]));
                     question.addPictureAnswer(ans);
@@ -123,7 +123,7 @@ public class Parser {
         public static LineType getType(String line, State state) throws InterpretationException {
             line = line.trim();
             if(line.isEmpty()) throw new InterpretationException("Empty line");
-            if(line.startsWith("//"))
+            if(line.startsWith("//") || line.startsWith("#"))
                 return COMMENT;
             if(line.startsWith(":"))
                 return STATEMENT;
@@ -170,7 +170,6 @@ public class Parser {
         //todo improve parsing (move Question#nextLine setting to jumps)
         previousLine = current;
         if(current instanceof Question) previousQuestion = (Question) current;
-        //return current;
     }
 
     public Line getHead() {

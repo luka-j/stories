@@ -22,6 +22,7 @@ import net.objecthunter.exp4j.VariableProvider;
 import net.objecthunter.exp4j.function.Functions;
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.FileProvider;
+import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.exceptions.LoadingException;
 import rs.lukaj.stories.parser.Type;
@@ -63,6 +64,7 @@ public class State implements VariableProvider {
                     value = fields[1];
                     break;
                 case DOUBLE:
+                case CONSTANT_DOUBLE:
                     value = Double.parseDouble(fields[1]);
                     break;
                 default: value = null; //need to shut up the compiler
@@ -77,9 +79,11 @@ public class State implements VariableProvider {
 
 
     private static final String SEP = ":";
-    private static final Pattern INVALID_NAMES = Pattern.compile("^.*[&|%+*<>=/\\\\\\-]+.*$|(.*([?:])$)");
+    private static final Pattern INVALID_NAMES = Pattern.compile("^.*[&|%+*^<>=/\\\\\\-]+.*$|(.*([?:])$)");
 
     public static void checkName(String name) throws InterpretationException {
+        if(name == null || name.isEmpty())
+            throw new InterpretationException("Variable name is null or empty");
         if(!Character.isLetter(name.charAt(0)) && name.charAt(0) != '_')
             throw new InterpretationException("Variable name doesn't start with a letter!");
         if(INVALID_NAMES.matcher(name).matches())
@@ -88,8 +92,14 @@ public class State implements VariableProvider {
             throw new InterpretationException("Variable name is a function name!");
     }
 
-    protected State() {
 
+    private void setPredefinedConstants() {
+        variables.put("true", new Value(Type.CONSTANT_DOUBLE, 1.));
+        variables.put("false", new Value(Type.CONSTANT_DOUBLE, 0.));
+    }
+
+    protected State() {
+        setPredefinedConstants();
     }
 
     protected State(File file) throws IOException {
@@ -99,6 +109,11 @@ public class State implements VariableProvider {
             Value val = new Value(fields[1]);
             variables.put(fields[0], val);
         }
+    }
+
+    private void checkCanModify(String name) {
+        if(variables.containsKey(name) && variables.get(name).type.isConst)
+            throw new ExecutionException("Attempting to modify a const value");
     }
 
     protected void saveToFile(File file) throws IOException {
@@ -116,16 +131,19 @@ public class State implements VariableProvider {
 
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
+        checkCanModify(name);
         variables.put(name, new Value(Type.STRING, value));
     }
 
     public void setVariable(String name, boolean value) throws InterpretationException {
         checkName(name);
+        checkCanModify(name);
         variables.put(name, new Value(Type.DOUBLE, value? 1. : 0.));
     }
 
     public void setVariable(String name, double value) throws InterpretationException {
         checkName(name);
+        checkCanModify(name);
         variables.put(name, new Value(Type.DOUBLE, value));
     }
 

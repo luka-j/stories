@@ -19,13 +19,17 @@
 package rs.lukaj.stories.parser;
 
 public enum Type {
-    STRING(String.class, "S"), DOUBLE(Double.class, "N");
+    STRING(String.class, "S", false),
+    DOUBLE(Double.class, "N", false),
+    CONSTANT_DOUBLE(Double.class, "N", true);
 
     public final Class typeClass;
     public final String mark;
-    Type(Class typeClass, String mark) {
+    public final boolean isConst;
+    Type(Class typeClass, String mark, boolean isConst) {
         this.typeClass = typeClass;
         this.mark = mark;
+        this.isConst = isConst;
     }
 
     public static boolean isTruthy(Object value) {

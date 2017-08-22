@@ -38,7 +38,7 @@ public interface DisplayProvider {
     /**
      *
      * @param question question to be displayed
-     * @param character character asking the question (can be null if it is posed by narrator)
+     * @param character character asking the question (can be null or empty if it is posed by narrator)
      * @param avatar avatar of the character asking (can be null if there is none)
      * @param time time allowed for answering the question in seconds, 0 for unlimited
      * @param answers possible answers to the question
@@ -49,7 +49,7 @@ public interface DisplayProvider {
     /**
      *
      * @param question question to be displayed
-     * @param character character asking the question (can be null if it is posed by narrator)
+     * @param character character asking the question (can be null or empty if it is posed by narrator)
      * @param avatar avatar of the character asking (can be null if there is none)
      * @param time time allowed for answering the question in seconds, 0 for unlimited
      * @param answers possible answers to the question, as image files

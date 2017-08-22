@@ -34,7 +34,7 @@ public class AssignStatement extends Statement {
     protected AssignStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
         String[] tokens = statement.split("=", 2);
-        if(tokens.length > 2)
+        if(tokens.length > 2) //this is actually always false... for now
             throw new InterpretationException("Malformed assign-statement");
         variable = tokens[0];
         State.checkName(variable);
