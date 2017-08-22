@@ -7,8 +7,8 @@ character : Well hello there
 
 :question:
 ?[q]char1: Who's the best
-  *ansMe: me
-  *ansYou: you
+  *[ansMe] me
+  *[ansYou] you
 :ansMe?
   char1: that's right
 :ansYou?
