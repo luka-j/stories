@@ -172,6 +172,10 @@ public class Book {
         return chapterNames;
     }
 
+    public State getState() {
+        return state;
+    }
+
     public State getBookInfo() {
         return info;
     }

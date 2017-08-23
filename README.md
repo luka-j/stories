@@ -142,8 +142,8 @@ exp4j.
 
 #### Predefined constants and functions
 
-Predefined constants are true which equals to 1.0 and false which equals
-to 0.0.
+Predefined constants are `true` which equals to 1.0 and `false` which
+equals to 0.0.
 
 Predefined functions are sin, cos, tan, cot, log, log2, log10, log1p,
 abs, acos, asin, atan, cbrt, floor, sinh, sqrt, tanh, cosh, ceil, pow,
@@ -157,7 +157,6 @@ Variable names _mustn't_ include any operator character or a question
 mark (?) or a colon (:).
 Additionally, variable name cannot be equal (in a case-sensitive way)
 to any of the predefined constants or functions.
-
 
 #### State and serialization
 
@@ -174,6 +173,17 @@ string (for numeric variables, a base 10 representation, where decimal
 part is delimited by a dot (.)). Each variable goes into its own line.
 Variables are stored in no particular order.
 
+Current state of the book can be obtained using `Book#getState` method.
+
+#### Special variables
+
+Special variables _shall_ start and end with at least one underscore.
+
+Only special variable present by default at this moment is the chapter
+counter, \_\_chapter\_\_. It is 1-based index of the current chapter and
+is  incremented on each chapter ending and fetched on each chapter
+beginning. If chapter counter is larger than chapter count, book is
+regarded as finished.
 
 ## Syntax and statements
 
@@ -256,7 +266,13 @@ name, otherwise an InterpretationException is thrown. If the answer is
 chosen, variable named as answer value is created and set to true;
 otherwise, it's set to false.
 
-//todo pictures
+If `{answer_text}` is an existing picture, the question is treated as a
+picture question and given answer as a picture answer. Picture questions
+_must_ have all picture answers; otherwise, an `InterpretationException`
+will be thrown. It is therefore recommended to either prefix picture
+names or use an extension when referring to the picture. Picture
+question's answers are presented as pictures instead of textual answers
+to the user, and are otherwise identical to the textual questions.
 
 ##### Textual input
 Lines starting with an opening square bracket (\[) and containing a
