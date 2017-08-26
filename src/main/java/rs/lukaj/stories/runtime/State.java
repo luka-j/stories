@@ -173,10 +173,16 @@ public class State implements VariableProvider {
         else return Double.NaN;
     }
 
-    public Double getOrDefault(String name, double value) {
+    public Double getOrDefault(String name, double defValue) {
         Double val = getDouble(name);
-        if(val==null || val == Double.NaN) return value;
+        if(val==null || val == Double.NaN) return defValue;
         else return val;
+    }
+
+    public String getOrDefault(String name, String defValue) {
+        String val = getString(name);
+        if(val == null) return defValue;
+        return val;
     }
 
     public Set<String> getVariableNames() {

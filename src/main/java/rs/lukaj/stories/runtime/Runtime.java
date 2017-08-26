@@ -40,8 +40,9 @@ public class Runtime {
         this.display = display;
     }
 
-    public void loadBook(String name) {
+    public Book loadBook(String name) {
         book = new Book(name, files, display);
+        return book;
     }
 
     public void restartBook() throws InterpretationException, LoadingException {
@@ -73,5 +74,9 @@ public class Runtime {
 
     public void endChapter() throws InterpretationException {
         book.endChapter();
+    }
+
+    public Book getCurrentlyExecutingBook() {
+        return book;
     }
 }
