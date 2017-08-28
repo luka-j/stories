@@ -106,6 +106,9 @@ public class Expressions {
 
         if(sides.length == 2 && !state.isNumeric(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
             return negation ? 0 : 1;
+            //the idea is to support expressions such as q=ans where ans is a variable, and q
+            //is supposed to have the value ans
+            //no idea how to put that into grammar
         }
         StringBuilder res = new StringBuilder();
         String var;
