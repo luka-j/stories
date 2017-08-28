@@ -37,6 +37,8 @@ public class Parser {
                 Question question = (Question)additionalParams[0];
                 if(question == null) throw new InterpretationException("Creating answer without the question");
                 String[] tokens = line.trim().substring(2).split("\\s*]\\s*", 2);
+                if(tokens.length < 2)
+                    throw new InterpretationException("No variable for answer");
                 if(chapter.imageExists(tokens[1])) {
                     PictureAnswer ans = new PictureAnswer(tokens[0], chapter.getImage(tokens[1]));
                     question.addPictureAnswer(ans);
@@ -67,6 +69,8 @@ public class Parser {
             @Override
             public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
                 String[] parts = line.trim().substring(1).split("\\s*:\\s*", 2);
+                if(parts.length < 2)
+                    throw new InterpretationException("Invalid question syntax; missing :");
                 String text = parts[1];
                 String var = Utils.between(parts[0], '[', ']');
                 String time = Utils.between(parts[0], '(', ')');
@@ -123,15 +127,16 @@ public class Parser {
         public static LineType getType(String line, State state) throws InterpretationException {
             line = line.trim();
             if(line.isEmpty()) throw new InterpretationException("Empty line");
-            if(line.startsWith("//") || line.startsWith("#"))
+            boolean escaped = line.startsWith("\\");
+            if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
-            if(line.startsWith(":"))
+            if(!escaped && line.startsWith(":"))
                 return STATEMENT;
-            if(line.startsWith("?"))
+            if(!escaped && line.startsWith("?"))
                 return QUESTION;
-            if(line.startsWith("*"))
+            if(!escaped && line.startsWith("*"))
                 return ANSWER;
-            if(line.startsWith("[") && line.contains("]"))
+            if(!escaped && line.startsWith("[") && line.contains("]"))
                 return INPUT;
             if(line.contains(":") && state.getString(line.split(":", 2)[0]) != null)
                 return SPEECH;
@@ -147,9 +152,13 @@ public class Parser {
 
 
     public Line parse(List<String> lines, Chapter chapter) throws InterpretationException {
-        for(String line : lines) parse(line, chapter);
-        setJumps(chapter);
-        return getHead();
+        try {
+            for (String line : lines) parse(line, chapter);
+            setJumps(chapter);
+            return getHead();
+        } catch (RuntimeException e) {
+            throw new InterpretationException("Unknown interpretation exception", e);
+        }
     }
 
     private void parse(String line, Chapter chapter) throws InterpretationException {
