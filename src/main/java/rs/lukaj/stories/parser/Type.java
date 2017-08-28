@@ -19,22 +19,24 @@
 package rs.lukaj.stories.parser;
 
 public enum Type {
-    STRING(String.class, "S", false),
-    DOUBLE(Double.class, "N", false),
-    CONSTANT_DOUBLE(Double.class, "N", true);
+    STRING(String.class, "S", false, false),
+    DOUBLE(Double.class, "N", false, true),
+    CONSTANT_DOUBLE(Double.class, "C", true, true);
 
     public final Class typeClass;
     public final String mark;
     public final boolean isConst;
-    Type(Class typeClass, String mark, boolean isConst) {
+    public final boolean isNumeric;
+    Type(Class typeClass, String mark, boolean isConst, boolean isNumeric) {
         this.typeClass = typeClass;
         this.mark = mark;
         this.isConst = isConst;
+        this.isNumeric = isNumeric;
     }
 
     public static boolean isTruthy(Object value) {
-        if(value instanceof Double) {
-            Double doubleVal = (Double)value;
+        if(value instanceof Number) {
+            Double doubleVal = ((Number)value).doubleValue();
             return doubleVal != 0 && doubleVal != Double.NaN;
         } else {
             return false; //this can be thought about... later

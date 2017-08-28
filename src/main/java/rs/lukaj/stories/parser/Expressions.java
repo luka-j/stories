@@ -23,20 +23,48 @@ import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.runtime.State;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Expressions {
-    private static final Pattern NUMERIC_OPS = Pattern.compile(".*[<>*/%^\\-]+.*");
-    private static final Pattern LOGICAL_OPS = Pattern.compile(".*[&|!]+.*"); //not allowing XORing for now
+    private static final Set<Character> nonStringOps = new HashSet<>();
+    static {
+        nonStringOps.add('<');
+        nonStringOps.add('>');
+        nonStringOps.add('*');
+        nonStringOps.add('/');
+        nonStringOps.add('%');
+        nonStringOps.add('^');
+        nonStringOps.add('-');
+        nonStringOps.add('&');
+        nonStringOps.add('|');
+    }
+
+    private static boolean isStringExpression(String expression) {
+        for(int i=0; i<expression.length(); i++) {
+            char curr = expression.charAt(i);
+            if(nonStringOps.contains(curr))
+                return false;
+            char next = 0;
+            if(i+1 < expression.length())
+                next = expression.charAt(i+1);
+            if(curr == '!' && next != '=')
+                return false;
+        }
+        return true;
+    }
 
     public static Object eval(String expression, State state) {
         if(expression.isEmpty()) return expression;
-
-        boolean containsNumericOps = NUMERIC_OPS.matcher(expression).matches();
-        boolean containsLogicalOps = LOGICAL_OPS.matcher(expression).matches();
+        if(state.hasVariable(expression)) {
+            if(state.isNumeric(expression))
+                return state.getDouble(expression);
+            else
+                return state.getString(expression);
+        }
 
         Object res;
-        if (!containsNumericOps && !containsLogicalOps) {
+        if (isStringExpression(expression)) {
             expression = expression.replaceAll("[()]", "");
             res = evalAddition(expression, state);
         } else {
@@ -48,30 +76,50 @@ public class Expressions {
 
     private static Object evalAddition(String expression, State state) {
         String[] sides = expression.split("=");
+        boolean negation = false;
+        if(sides.length > 1 && sides[0].charAt(sides[0].length()-1) == '!') {
+            negation = true;
+            sides[0] = sides[0].substring(0, sides[0].length()-1);
+        }
         if(sides.length > 2) throw new ExecutionException("malformed basic expression: multiple =");
         String[] vars = sides[sides.length-1].split("\\s*\\+\\s*");
         boolean isNumeric = true;
         double sum = 0;
-        for(String var : vars) {
-            if(!state.isDouble(var)) {
-                isNumeric = false;
-                break;
-            } else {
-                sum += state.getDouble(var);
+        if(!state.isNumeric(sides[0])) {
+            isNumeric = false;
+        } else {
+            for(String var : vars) {
+                if(!state.isNumeric(var)) {
+                    isNumeric = false;
+                    break;
+                } else {
+                    sum += state.getDouble(var);
+                }
             }
         }
         if(isNumeric && sides.length == 1) return sum;
-        if(isNumeric && sides.length == 2) return state.getDouble(sides[0]) == sum ? 1 : 0;
+        if(isNumeric && sides.length == 2) {
+            boolean ret = state.getDouble(sides[0]) == sum;
+            if(ret ^ negation) return 1;
+            else return 0;
+        }
 
+        if(sides.length == 2 && !state.isNumeric(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
+            return negation ? 0 : 1;
+        }
         StringBuilder res = new StringBuilder();
         String var;
         for(String str : vars)
             if((var=state.getString(str)) != null)
-                res.append(state.getString(var));
+                res.append(var);
             else
                 res.append(str);
         if(sides.length == 1) return res.toString();
-        else return res.toString().equals(state.getString(sides[0])) ? 1 : 0;
+        else {
+            boolean ret = res.toString().equals(state.getString(sides[0])); //doesn't work
+            if(ret ^ negation) return 1;
+            else return 0;
+        }
     }
 
     private static double evalOperation(String expression, State state) {
@@ -86,19 +134,32 @@ public class Expressions {
 
     public static String substituteVariables(String expression, State state) {
         StringBuilder res = new StringBuilder(), var = new StringBuilder();
-        boolean isVariable = false;
+        boolean isVariable = false, skippedBracket = false;
         for(int i=0; i<expression.length(); i++) {
             char ch = expression.charAt(i);
             if(!isVariable) {
-                if(ch == '[')
-                    isVariable = true;
-                else
+                if(ch == '[') {
+                    char next = 0;
+                    if(i+1<expression.length()) next = expression.charAt(i+1);
+                    if(next != '[') {
+                        isVariable = true;
+                    } else {
+                        i++;
+                        res.append(ch);
+                        skippedBracket = true;
+                    }
+                } else {
                     res.append(ch);
+                    char next = 0;
+                    if(i+1<expression.length()) next = expression.charAt(i+1);
+                    if(skippedBracket && ch == ']' && next == ']') {
+                        i++;
+                        skippedBracket = false;
+                    }
+                }
             } else {
                 if(ch == ']') {
-                    String varStr = var.toString();
-                    if(state.hasVariable(varStr)) res.append(state.getString(varStr));
-                    else res.append('[').append(var).append(']');
+                    res.append(eval(var.toString(), state));
                     isVariable = false;
                     var.delete(0, var.length());
                 } else {

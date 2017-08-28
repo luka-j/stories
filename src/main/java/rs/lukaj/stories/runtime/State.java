@@ -189,9 +189,9 @@ public class State implements VariableProvider {
         return variables.keySet();
     }
 
-    public boolean isDouble(String name) {
+    public boolean isNumeric(String name) {
         if(variables.get(name) == null) return false;
-        return variables.get(name).type == Type.DOUBLE;
+        return variables.get(name).type.isNumeric;
     }
 
     @Override

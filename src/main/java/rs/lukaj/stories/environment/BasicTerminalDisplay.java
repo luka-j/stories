@@ -88,7 +88,8 @@ public class BasicTerminalDisplay implements DisplayProvider {
             System.out.print(hint + ": ");
         }
         Scanner in = new Scanner(System.in);
-        return in.nextLine();
+        String ret = in.nextLine();
+        return ret == null ? "" : ret;
     }
 
     @Override
