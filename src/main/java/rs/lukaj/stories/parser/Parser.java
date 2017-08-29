@@ -128,6 +128,8 @@ public class Parser {
             line = line.trim();
             if(line.isEmpty()) throw new InterpretationException("Empty line");
             boolean escaped = line.startsWith("\\");
+            if(escaped)
+                line = line.substring(1);
             if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
             if(!escaped && line.startsWith(":"))

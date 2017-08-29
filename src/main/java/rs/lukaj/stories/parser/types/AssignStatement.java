@@ -29,7 +29,8 @@ import rs.lukaj.stories.runtime.State;
  */
 public class AssignStatement extends Statement {
 
-    private String variable, expression;
+    private String variable;
+    private Expressions expression;
 
     protected AssignStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
@@ -39,12 +40,12 @@ public class AssignStatement extends Statement {
         variable = tokens[0];
         chapter.getState().declareVariable(variable);
         if(tokens.length > 1)
-            expression = tokens[1];
+            expression = new Expressions(tokens[1], chapter.getState());
         else
-            expression = "";
+            expression = new Expressions("", chapter.getState());
         //if(containsLogicalOps && containsNumericOps)
         //    throw new InterpretationException("Malformed expression in assign-statement");
-        //todo we're allowing all kinds of expressions for now
+        //todo we're allowing all kinds of expressions for now, going between the types as necessary
 
     }
 
@@ -52,7 +53,7 @@ public class AssignStatement extends Statement {
     public Line execute() {
         State state = chapter.getState();
         try {
-            Object res = Expressions.eval(expression, state);
+            Object res = expression.eval();
             if(res instanceof Double)
                 state.setVariable(variable, (Double)res);
             else

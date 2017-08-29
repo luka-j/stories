@@ -18,7 +18,9 @@
 
 package rs.lukaj.stories.parser;
 
+import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.runtime.State;
 
@@ -40,6 +42,44 @@ public class Expressions {
         nonStringOps.add('|');
     }
 
+    private enum ExprType {
+        BASIC, STRING, NUMERIC
+    }
+    private ExprType type;
+    private Object value;
+    private Expression expression;
+    private State state;
+
+    public Expressions(String expression, State state) {
+        this.state = state;
+        if(expression == null || expression.isEmpty()) {
+            type = ExprType.BASIC;
+            value = "";
+        } else if(Utils.isDouble(expression)) {
+            type = ExprType.BASIC;
+            value = Double.parseDouble(expression);
+        } else if(state.hasVariable(expression)) {
+            type = ExprType.BASIC;
+            if(state.isNumeric(expression)) {
+                value = state.getDouble(expression);
+            } else {
+                value = state.getString(expression);
+            }
+        } else {
+            if(isStringExpression(expression)) {
+                type = ExprType.STRING;
+                value = expression;
+            } else {
+                type = ExprType.NUMERIC;
+                this.expression = new ExpressionBuilder(expression)
+                        .implicitMultiplication(true)
+                        .operator(Arrays.asList(Operators.operators()))
+                        .variables(state.getVariableNames())
+                        .build();
+            }
+        }
+    }
+
     private static boolean isStringExpression(String expression) {
         for(int i=0; i<expression.length(); i++) {
             char curr = expression.charAt(i);
@@ -54,28 +94,17 @@ public class Expressions {
         return true;
     }
 
-    public static Object eval(String expression, State state) {
-        if(expression.isEmpty()) return expression;
-        if(state.hasVariable(expression)) {
-            if(state.isNumeric(expression))
-                return state.getDouble(expression);
-            else
-                return state.getString(expression);
+    public Object eval() {
+        switch (type) {
+            case BASIC: return value;
+            case STRING: return evalAddition(value.toString(), state);
+            case NUMERIC: return expression.setVariableProvider(state).evaluate();
+            default: throw new IllegalStateException("Illegal expression type");
         }
-
-        Object res;
-        if (isStringExpression(expression)) {
-            expression = expression.replaceAll("[()]", "");
-            res = evalAddition(expression, state);
-        } else {
-            res = evalOperation(expression, state);
-        }
-
-        return res;
     }
 
     private static Object evalAddition(String expression, State state) {
-        String[] sides = expression.split("=");
+        String[] sides = expression.replaceAll("[()]", "").split("=");
         boolean negation = false;
         if(sides.length > 1 && sides[0].charAt(sides[0].length()-1) == '!') {
             negation = true;
@@ -125,16 +154,6 @@ public class Expressions {
         }
     }
 
-    private static double evalOperation(String expression, State state) {
-        return new ExpressionBuilder(expression)
-                .implicitMultiplication(true)
-                .operator(Arrays.asList(Operators.operators()))
-                .variables(state.getVariableNames())
-                .build()
-                .setVariableProvider(state)
-                .evaluate();
-    }
-
     public static String substituteVariables(String expression, State state) {
         StringBuilder res = new StringBuilder(), var = new StringBuilder();
         boolean isVariable = false, skippedBracket = false;
@@ -162,7 +181,7 @@ public class Expressions {
                 }
             } else {
                 if(ch == ']') {
-                    res.append(eval(var.toString(), state));
+                    res.append(new Expressions(var.toString(), state).eval());
                     isVariable = false;
                     var.delete(0, var.length());
                 } else {

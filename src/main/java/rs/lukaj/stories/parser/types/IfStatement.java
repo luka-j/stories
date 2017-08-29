@@ -27,16 +27,17 @@ import rs.lukaj.stories.runtime.Chapter;
  */
 public class IfStatement extends Statement {
     private Line endIf;
-    private String expression;
+    private Expressions expression;
 
     protected IfStatement(Chapter chapter, String statement, int indent) {
         super(chapter, indent);
-        this.expression = statement.substring(0, statement.length()-1);
+        this.expression = new Expressions(statement.substring(0, statement.length()-1), chapter.getState());
+
     }
 
     @Override
     public Line execute() {
-        if(Type.isTruthy(Expressions.eval(expression, chapter.getState()))) //todo parse expression in constructor (failfast)
+        if(Type.isTruthy(expression.eval()))
             return nextLine;
         else
             return endIf;
