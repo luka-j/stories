@@ -67,13 +67,30 @@ public class State implements VariableProvider {
                 case CONSTANT_DOUBLE:
                     value = Double.parseDouble(fields[1]);
                     break;
+                case NULL:
+                    value = null;
+                    break;
                 default: value = null; //need to shut up the compiler
             }
         }
 
         @Override
         public String toString() {
-            return type.mark + SEP + value.toString();
+            switch (type) {
+                case STRING:
+                    return (String)value;
+                case DOUBLE:
+                case CONSTANT_DOUBLE:
+                    return value.toString();
+                case NULL:
+                    return "";
+                default:
+                    return null;
+            }
+        }
+
+        public String serialize() {
+            return type.mark + SEP + String.valueOf(value);
         }
     }
 
@@ -121,13 +138,19 @@ public class State implements VariableProvider {
         for(Map.Entry<String, Value> e : variables.entrySet()) {
             out.write(e.getKey());
             out.write(SEP);
-            out.write(e.getValue().toString());
+            out.write(e.getValue().serialize());
             out.write("\n");
         }
         out.close();
     }
 
     private Map<String, Value> variables = new HashMap<>();
+
+    public void declareVariable(String name) throws InterpretationException {
+        checkName(name);
+        checkCanModify(name);
+        variables.put(name, new Value(Type.NULL, null));
+    }
 
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
@@ -154,7 +177,7 @@ public class State implements VariableProvider {
     public String getString(String name) {
         if(Utils.isDouble(name)) return name;
         if(!variables.containsKey(name)) return null;
-        return variables.get(name).value.toString();
+        return variables.get(name).toString();
     }
 
     public boolean getBool(String name) {
@@ -169,7 +192,7 @@ public class State implements VariableProvider {
         if(Utils.isDouble(name)) return Double.parseDouble(name);
         Value var = variables.get(name);
         if(var == null) return null;
-        if(var.type == Type.DOUBLE) return (Double)var.value;
+        if(var.type == Type.DOUBLE) return ((Number)var.value).doubleValue();
         else return Double.NaN;
     }
 

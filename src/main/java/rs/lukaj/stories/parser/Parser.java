@@ -138,7 +138,7 @@ public class Parser {
                 return ANSWER;
             if(!escaped && line.startsWith("[") && line.contains("]"))
                 return INPUT;
-            if(line.contains(":") && state.getString(line.split(":", 2)[0]) != null)
+            if(line.contains(":") && state.hasVariable(line.split("\\s*:", 2)[0]))
                 return SPEECH;
             return NARRATIVE;
         }

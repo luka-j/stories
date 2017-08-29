@@ -19,8 +19,9 @@
 package rs.lukaj.stories.parser;
 
 public enum Type {
+    NULL(Void.class, "N", false, false),
     STRING(String.class, "S", false, false),
-    DOUBLE(Double.class, "N", false, true),
+    DOUBLE(Double.class, "D", false, true),
     CONSTANT_DOUBLE(Double.class, "C", true, true);
 
     public final Class typeClass;

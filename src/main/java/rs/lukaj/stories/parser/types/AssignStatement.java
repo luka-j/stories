@@ -37,7 +37,7 @@ public class AssignStatement extends Statement {
         if(tokens.length > 2) //this is actually always false... for now
             throw new InterpretationException("Malformed assign-statement");
         variable = tokens[0];
-        State.checkName(variable);
+        chapter.getState().declareVariable(variable);
         if(tokens.length > 1)
             expression = tokens[1];
         else

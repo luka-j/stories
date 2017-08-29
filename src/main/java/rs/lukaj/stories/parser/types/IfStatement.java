@@ -36,7 +36,7 @@ public class IfStatement extends Statement {
 
     @Override
     public Line execute() {
-        if(Type.isTruthy(Expressions.eval(expression, chapter.getState())))
+        if(Type.isTruthy(Expressions.eval(expression, chapter.getState()))) //todo parse expression in constructor (failfast)
             return nextLine;
         else
             return endIf;
