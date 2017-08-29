@@ -18,6 +18,7 @@
 
 package rs.lukaj.stories.parser.types;
 
+import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Expressions;
 import rs.lukaj.stories.parser.Type;
 import rs.lukaj.stories.runtime.Chapter;
@@ -29,7 +30,7 @@ public class IfStatement extends Statement {
     private Line endIf;
     private Expressions expression;
 
-    protected IfStatement(Chapter chapter, String statement, int indent) {
+    protected IfStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
         this.expression = new Expressions(statement.substring(0, statement.length()-1), chapter.getState());
 

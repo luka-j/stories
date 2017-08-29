@@ -40,7 +40,7 @@ public class Runtime {
         this.display = display;
     }
 
-    public Book loadBook(String name) {
+    public Book loadBook(String name) throws LoadingException {
         book = new Book(name, files, display);
         return book;
     }
@@ -56,8 +56,14 @@ public class Runtime {
      * @throws ExecutionException if any exception occurs during execution
      */
     public boolean next() throws ExecutionException {
-        current = current.execute();
-        return current != null;
+        try {
+            current = current.execute();
+            return current != null;
+        } catch (ExecutionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new ExecutionException("Unknown execution exception", e);
+        }
     }
 
     /**

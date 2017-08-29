@@ -22,6 +22,7 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.ExecutionException;
+import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.State;
 
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class Expressions {
     private Expression expression;
     private State state;
 
-    public Expressions(String expression, State state) {
+    public Expressions(String expression, State state) throws InterpretationException {
         this.state = state;
         if(expression == null || expression.isEmpty()) {
             type = ExprType.BASIC;
@@ -71,15 +72,26 @@ public class Expressions {
                 value = expression;
             } else {
                 type = ExprType.NUMERIC;
-                this.expression = new ExpressionBuilder(expression)
-                        .implicitMultiplication(true)
-                        .operator(Arrays.asList(Operators.operators()))
-                        .variables(state.getVariableNames())
-                        .build();
+                try {
+                    this.expression = new ExpressionBuilder(expression)
+                            .implicitMultiplication(true)
+                            .operator(Arrays.asList(Operators.operators()))
+                            .variables(state.getVariableNames())
+                            .build();
+                } catch (IllegalArgumentException e) {
+                    throw new InterpretationException("Error while parsing numeric expression");
+                }
             }
         }
     }
 
+    /**
+     * Checks whether expression contains any of the {@link #nonStringOps}
+     * or a ! not followed by a = (!= is inequality operator, which is
+     * allowed for strings)
+     * @param expression expression to be checked
+     * @return true if expression can be parsed as string expression, false otherwise
+     */
     private static boolean isStringExpression(String expression) {
         for(int i=0; i<expression.length(); i++) {
             char curr = expression.charAt(i);
@@ -99,7 +111,7 @@ public class Expressions {
             case BASIC: return value;
             case STRING: return evalAddition(value.toString(), state);
             case NUMERIC: return expression.setVariableProvider(state).evaluate();
-            default: throw new IllegalStateException("Illegal expression type");
+            default: throw new IllegalStateException("Illegal expression type"); //this shouldn't happen
         }
     }
 
@@ -181,7 +193,12 @@ public class Expressions {
                 }
             } else {
                 if(ch == ']') {
-                    res.append(new Expressions(var.toString(), state).eval());
+                    try {
+                        res.append(new Expressions(var.toString(), state).eval());
+                    } catch (InterpretationException e) {
+                        res.append('[').append(var.toString()).append(']');
+                        //todo figure out if falling back like this is really a good idea
+                    }
                     isVariable = false;
                     var.delete(0, var.length());
                 } else {

@@ -1,6 +1,7 @@
 #this is a short test, meant for covering various ways of writing stuff here
  #not really representative
 Hello World!
+\???
 :character
 :char2
 //we need to declare characters before using them

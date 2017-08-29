@@ -124,12 +124,9 @@ public class Parser {
         public abstract Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException;
 
 
-        public static LineType getType(String line, State state) throws InterpretationException {
+        public static LineType getType(String line, State state, boolean escaped) throws InterpretationException {
             line = line.trim();
             if(line.isEmpty()) throw new InterpretationException("Empty line");
-            boolean escaped = line.startsWith("\\");
-            if(escaped)
-                line = line.substring(1);
             if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
             if(!escaped && line.startsWith(":"))
@@ -164,8 +161,11 @@ public class Parser {
     }
 
     private void parse(String line, Chapter chapter) throws InterpretationException {
-        LineType type = getType(line, chapter.getState());
+        boolean escaped = false;
+        if(line.startsWith("\\")) escaped = true;
+        LineType type = getType(line, chapter.getState(), escaped);
         if(type == COMMENT) return;
+        if(escaped) line = line.substring(1);
 
         int commIndex = line.indexOf("//");
         if(commIndex >= 0) line = line.substring(0, commIndex);
