@@ -35,6 +35,11 @@ public class LinuxDebugFiles implements FileProvider {
     }
 
     @Override
+    public File getRootDirectory(String path) {
+        return getSourceDirectory(path);
+    }
+
+    @Override
     public boolean imageExists(String path) {
         return getImage(path).isFile();
     }
