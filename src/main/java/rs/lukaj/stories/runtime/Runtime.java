@@ -85,4 +85,22 @@ public class Runtime {
     public Book getCurrentlyExecutingBook() {
         return book;
     }
+
+
+    /**
+     * This provides a way of executing the whole book in a tight loop (i.e. it advances
+     * statements and chapters until it reaches the end). It obviously takes a while
+     * to execute.
+     * @param restart whether the book should start from the beginning or from where the
+     *                user left off
+     * @throws InterpretationException
+     */
+    public void executeInTightLoop(boolean restart) throws InterpretationException {
+        if(restart) restartBook();
+        else if (!nextChapter()) return; //attempting to resume
+        do {
+            while (next()) ;
+            endChapter();
+        } while (nextChapter());
+    }
 }

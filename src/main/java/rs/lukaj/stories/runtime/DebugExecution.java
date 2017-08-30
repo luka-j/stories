@@ -28,11 +28,7 @@ public class DebugExecution {
         runtime.loadBook("sample");
         try {
             System.out.println("\n\nRUNNING BOOK\n\n");
-            runtime.restartBook();
-            do {
-                while (runtime.next()) ;
-                runtime.endChapter();
-            } while (runtime.nextChapter());
+            runtime.executeInTightLoop(true);
             System.out.println("\n\nEND RUN\n\n");
         } catch (InterpretationException e) {
             e.printStackTrace();
