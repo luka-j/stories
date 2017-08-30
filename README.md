@@ -297,8 +297,10 @@ All other lines are treated as narratives and are displayed to the user
 as such.
 
 //todo whitespace rules inside statements (usually ignored)
+
 //todo escaping, variable substitution
 
+//todo update file structure guides
 ## Interpretation rules
 
 //todo

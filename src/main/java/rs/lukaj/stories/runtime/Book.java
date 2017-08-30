@@ -54,6 +54,7 @@ public class Book {
         this.files = files;
         this.display = display;
         File sourceDir = files.getSourceDirectory(name);
+        File rootDir = files.getRootDirectory(name);
         if(!sourceDir.isDirectory()) throw new LoadingException("Cannot find book source directory at " + sourceDir.getAbsolutePath());
         String[] children = sourceDir.list(new FilenameFilter() {
             @Override
@@ -63,7 +64,7 @@ public class Book {
         });
         if(children == null || children.length == 0)
             throw new LoadingException("Cannot list() sources in source directory or there are no valid sources");
-        stateFile = new File(sourceDir, STATE_FILENAME);
+        stateFile = new File(rootDir, STATE_FILENAME);
 
         Arrays.sort(children, Utils.enumeratedStringsComparator);
         if(stateFile.isFile()) {
@@ -81,7 +82,7 @@ public class Book {
             chapterNames.add(getChapterName(children[i]));
         }
 
-        File infoFile = new File(sourceDir, METADATA_FILENAME);
+        File infoFile = new File(rootDir, METADATA_FILENAME);
         if(infoFile.isFile()) {
             try {
                 info = new State(infoFile);

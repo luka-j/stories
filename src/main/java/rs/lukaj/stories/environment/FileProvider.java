@@ -38,5 +38,7 @@ public interface FileProvider {
 
     File getSourceDirectory(String path);
 
+    File getRootDirectory(String path);
+
     boolean imageExists(String path);
 }
