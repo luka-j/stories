@@ -297,11 +297,11 @@ textual input.
 Lines containing a colon (:), but not starting with it, whose part
 before the colon is a previously defined variable (i.e. through
 assign-statement) is treated as character speech. Value of the variable,
-if not an empty string, represents the image of the character's avatar
-which will be displayed to the user. Second part of the statement (after
-the colon) is the line character speaks. As of this moment, there is no
-limit to the speech length and implementation should be able to handle
-all lengths.
+if not an empty string or of Null type, represents the image of the
+character's avatar which will be displayed to the user. Second part of
+the statement (after the colon) is the line character speaks. As of this
+moment, there is no limit to the speech length and implementation should
+be able to handle all lengths.
 
 ##### Narrative
 All other lines are treated as narratives and are displayed to the user
@@ -311,7 +311,6 @@ as such.
 
 //todo escaping, variable substitution
 
-//todo update file structure guides
 ## Interpretation rules
 
 //todo

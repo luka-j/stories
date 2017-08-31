@@ -24,25 +24,54 @@ import rs.lukaj.stories.parser.Expressions;
 import rs.lukaj.stories.runtime.Chapter;
 import rs.lukaj.stories.runtime.State;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by luka on 4.6.17..
  */
 public class AssignStatement extends Statement {
 
-    private String variable;
-    private Expressions expression;
+    private List<String> variable = new ArrayList<>();
+    private List<Expressions> expression = new ArrayList<>();
+
+    private static List<String> splitAssignments(String statement) {
+        List<String> assignments = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for(int i=0; i<statement.length(); i++) {
+            char ch = statement.charAt(i);
+            if(ch == '\\') {
+                char next = i+1 < statement.length() ? statement.charAt(i+1) : 0;
+                if(next == ',') {
+                    current.append(next);
+                    i++;
+                }
+            } else if(ch == ',') {
+                assignments.add(current.toString());
+                current.delete(0, current.length());
+            } else {
+                current.append(ch);
+            }
+        }
+        assignments.add(current.toString());
+        return assignments;
+    }
 
     protected AssignStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
-        String[] tokens = statement.split("=", 2);
-        if(tokens.length > 2) //this is actually always false... for now
-            throw new InterpretationException("Malformed assign-statement");
-        variable = tokens[0];
-        chapter.getState().declareVariable(variable);
-        if(tokens.length > 1)
-            expression = new Expressions(tokens[1], chapter.getState());
-        else
-            expression = new Expressions("", chapter.getState());
+        List<String> statements = splitAssignments(statement);
+        for(String stmt : statements) {
+            String[] tokens = stmt.split("=", 2);
+            if (tokens.length > 2) //this is actually always false... for now
+                throw new InterpretationException("Malformed assign-statement");
+            String varName = tokens[0].trim();
+            chapter.getState().declareVariable(varName);
+            variable.add(varName);
+            if (tokens.length > 1)
+                expression.add(new Expressions(tokens[1].trim(), chapter.getState()));
+            else
+                expression.add(null);
+        }
         //if(containsLogicalOps && containsNumericOps)
         //    throw new InterpretationException("Malformed expression in assign-statement");
         //todo we're allowing all kinds of expressions for now, going between the types as necessary
@@ -52,14 +81,20 @@ public class AssignStatement extends Statement {
     @Override
     public Line execute() {
         State state = chapter.getState();
-        try {
-            Object res = expression.eval();
-            if(res instanceof Double)
-                state.setVariable(variable, (Double)res);
-            else
-                state.setVariable(variable, res.toString());
-        } catch (InterpretationException e) {
-            throw new ExecutionException("Uncaught InterpretationException in AssignStatement#execute");
+        for(int i=0; i<variable.size(); i++) {
+            String variable = this.variable.get(i);
+            Expressions expression = this.expression.get(i);
+            if(expression == null) continue;
+
+            try {
+                Object res = expression.eval();
+                if (res instanceof Double)
+                    state.setVariable(variable, (Double) res);
+                else
+                    state.setVariable(variable, res.toString());
+            } catch (InterpretationException e) {
+                throw new ExecutionException("Uncaught InterpretationException in AssignStatement#execute");
+            }
         }
         return nextLine;
     }

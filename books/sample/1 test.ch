@@ -2,11 +2,11 @@
  #not really representative
 Hello World!
 \???
-:character
-:char2
+:char2, character
 //we need to declare characters before using them
 character : Well hello there
-:5<sqrt(10)+3?
+:res=sqrt(10)+3
+:5<res?
   You can do math, congrats!
 
 :question:

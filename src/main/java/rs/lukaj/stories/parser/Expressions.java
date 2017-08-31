@@ -41,7 +41,9 @@ public class Expressions {
         nonStringOps.add('-');
         nonStringOps.add('&');
         nonStringOps.add('|');
-    }
+        nonStringOps.add('(');
+        nonStringOps.add(')');
+    } //todo how do we actually concat strings which contain these?
 
     private enum ExprType {
         BASIC, STRING, NUMERIC
@@ -116,7 +118,7 @@ public class Expressions {
     }
 
     private static Object evalAddition(String expression, State state) {
-        String[] sides = expression.replaceAll("[()]", "").split("=");
+        String[] sides = expression.split("=");
         boolean negation = false;
         if(sides.length > 1 && sides[0].charAt(sides[0].length()-1) == '!') {
             negation = true;
