@@ -111,8 +111,8 @@ public class State implements VariableProvider {
 
 
     private void setPredefinedConstants() {
-        variables.put("true", new Value(Type.CONSTANT_DOUBLE, 1.));
-        variables.put("false", new Value(Type.CONSTANT_DOUBLE, 0.));
+        variables.put("True", new Value(Type.CONSTANT_DOUBLE, 1.));
+        variables.put("False", new Value(Type.CONSTANT_DOUBLE, 0.));
     }
 
     protected State() {

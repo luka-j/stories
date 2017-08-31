@@ -111,10 +111,10 @@ and `Double`s, as defined by the JLS. The language itself is untyped.
 expected. `Double` is wrapped into a `String` when used in a context
 where `String` is expected. There is a `Boolean` type which is a `Double`,
 1 for true and 0 for false value. 0 and NaN evaluate as false, and any
-other value as true. This implies all Doubles but 0 are truthy values,
-while any String is a falsy value. `true` and `false` are predefined
+other value as true. All Doubles but 0 are truthy values, while any
+String but an empty one is falsy. `True` and `False` are predefined
 constant variables which will raise an ExecutionException in case their
-modification is attempted.
+modification is attempted, initialized to 1.0 and 0.0 respectively.
 
 #### Evaluating expressions
 

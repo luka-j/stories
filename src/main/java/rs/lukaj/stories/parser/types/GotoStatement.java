@@ -26,19 +26,27 @@ import rs.lukaj.stories.runtime.Chapter;
  */
 public class GotoStatement extends Statement {
     private String targetLabel;
+    private Line jumpTo;
 
     protected GotoStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
         targetLabel = statement.substring(1);
+        Line target = chapter.getLabel(targetLabel);
+        if(target != null) //if there are multiple same labels, prefer closest previous
+            jumpTo = target;
     }
 
     @Override
     public Line execute() {
-        return nextLine;
+        return jumpTo;
+    }
+
+    public boolean hasSetJump() {
+        return jumpTo != null;
     }
 
     public void setJump(Chapter chapter) throws InterpretationException {
-        nextLine = chapter.getLabel(targetLabel);
-        if(nextLine == null) throw new InterpretationException("Invalid label for goto");
+        jumpTo = chapter.getLabel(targetLabel);
+        if(jumpTo == null) throw new InterpretationException("Invalid label for goto");
     }
 }

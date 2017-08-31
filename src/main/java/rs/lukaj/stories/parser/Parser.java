@@ -43,7 +43,7 @@ public class Parser {
                     PictureAnswer ans = new PictureAnswer(tokens[0], chapter.getImage(tokens[1]));
                     question.addPictureAnswer(ans);
                 } else {
-                    Answer ans = new Answer(tokens[0], tokens[1]);
+                    Answer ans = new Answer(chapter, tokens[0], tokens[1]);
                     question.addAnswer(ans);
                 }
                 //we're being quite strict here: disallowing mixing of image and String, even if
@@ -195,9 +195,9 @@ public class Parser {
         IfStatement conditional = null;
         while(curr != null) {
             Line next = curr.getNextLine();
-            if(curr instanceof GotoStatement) {
+            if(curr instanceof GotoStatement && !((GotoStatement)curr).hasSetJump()) {
                 ((GotoStatement)curr).setJump(chapter);
-            }
+            } //addressing only forward jumps here
 
             if(!inside && curr instanceof IfStatement) {
                 inside = true;

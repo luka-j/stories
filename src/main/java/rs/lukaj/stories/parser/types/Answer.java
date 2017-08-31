@@ -20,6 +20,7 @@ package rs.lukaj.stories.parser.types;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.runtime.Chapter;
 import rs.lukaj.stories.runtime.State;
 
 /**
@@ -29,8 +30,8 @@ public class Answer implements AnswerLike {
     protected String variable;
     protected String text;
 
-    public Answer(String variable, String text) throws InterpretationException {
-        State.checkName(variable);
+    public Answer(Chapter chapter, String variable, String text) throws InterpretationException {
+        chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.text = text;
     }

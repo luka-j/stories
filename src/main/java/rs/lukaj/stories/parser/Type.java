@@ -39,6 +39,9 @@ public enum Type {
         if(value instanceof Number) {
             Double doubleVal = ((Number)value).doubleValue();
             return doubleVal != 0 && doubleVal != Double.NaN;
+        } else if(value instanceof String) {
+            String str = value.toString();
+            return !str.isEmpty();
         } else {
             return false; //this can be thought about... later
         }

@@ -48,6 +48,7 @@ public class Expressions {
     }
     private ExprType type;
     private Object value;
+    private String variable;
     private Expression expression;
     private State state;
 
@@ -61,11 +62,7 @@ public class Expressions {
             value = Double.parseDouble(expression);
         } else if(state.hasVariable(expression)) {
             type = ExprType.BASIC;
-            if(state.isNumeric(expression)) {
-                value = state.getDouble(expression);
-            } else {
-                value = state.getString(expression);
-            }
+            variable = expression;
         } else {
             if(isStringExpression(expression)) {
                 type = ExprType.STRING;
@@ -108,7 +105,10 @@ public class Expressions {
 
     public Object eval() {
         switch (type) {
-            case BASIC: return value;
+            case BASIC:
+                if(value != null) return value;
+                if(state.isNumeric(variable)) return state.getDouble(variable);
+                else return state.getString(variable);
             case STRING: return evalAddition(value.toString(), state);
             case NUMERIC: return expression.setVariableProvider(state).evaluate();
             default: throw new IllegalStateException("Illegal expression type"); //this shouldn't happen

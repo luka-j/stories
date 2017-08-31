@@ -20,7 +20,6 @@ package rs.lukaj.stories.parser.types;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
-import rs.lukaj.stories.runtime.State;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class Question extends Line {
 
     protected Question(Chapter chapter, String variable, String text, String character, double time, int indent) throws InterpretationException {
         super(chapter, indent);
-        State.checkName(variable);
+        chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.text = text;
         this.character = character;
@@ -52,19 +51,19 @@ public class Question extends Line {
 
     @Override
     public Line execute() {
-        String chosen; //todo what happens if time's up and user hasn't selected the answer, so index is -1 ?
+        String chosen = null;
         int chosenIndex;
         if(containsPictures)
             chosenIndex = displayPictureQuestion();
         else
             chosenIndex = displayQuestion();
-        chosen = answers.get(chosenIndex).getVariable();
+        if(chosenIndex >= 0)
+            chosen = answers.get(chosenIndex).getVariable();
         try {
-            chapter.getState().setVariable(variable, chosen);
-            chapter.getState().setFlag(chosen);
+            if(chosen != null)
+                chapter.getState().setVariable(variable, chosen);
             for(int i=0; i<answers.size(); i++)
-                if(i != chosenIndex)
-                    chapter.getState().setVariable(answers.get(i).getVariable(), false);
+                chapter.getState().setVariable(answers.get(i).getVariable(), i == chosenIndex);
         } catch (InterpretationException ex) {
             throw new RuntimeException("Caught unhandled InterpretationException in Quesiton#execute!", ex);
         }
