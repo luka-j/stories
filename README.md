@@ -14,6 +14,10 @@ Almost as pretty as php, but thankfully much smaller and less
 general-purpose. Turing complete, though implementing any non-trivial
 algorithm will probably be quite tedious.
 
+*By the way, this is seeing a shitload of releases at the moment because
+I'm developing my other project which includes this library and need
+a release any time I want to incorporate a modification*
+
 ## Idea
 
 Provide an open-source language and interpreter for creating
@@ -79,22 +83,25 @@ or show output to the user.
 #### Files
 
 The book is represented by a directory in the filesystem, which is
-obtained by a call to the `FileProvider#getSourceDirectory(String)`
+obtained by a call to the `FileProvider#getRootDirectory(String)`
 with the book name as the argument. Directory name _shall_ be the
 book name. This, then, disqualifies certain characters such as file
 separator (and a bunch of others on Windows) and reserved file names
 (such as . and ..) as book names, so this _needn't_ be strictly
 followed if implementation deems this requirement is too strict.
 
-Current state is saved inside book directory, in a file named `.state`.
-It follows syntax described in the State section.
+Current state is saved inside book root directory, in a file named
+`.state`. It follows syntax described in the State section.
 
 In case additional metadata for the book needs to be specified (e.g.
 book title, if it isn't the same as folder name), it can be done in the
-.info file, following the state file syntax. State loaded from the file
-is available using `.runtime.Book#getBookInfo` method.
+`.info` file which is in book root directory, following the state file
+syntax. State loaded from the file is available using
+`.runtime.Book#getBookInfo` method.
 
 Each chapter is represented by a file named as `{no} {chapter_name}.ch`
+inside source directory obtained by `FileProvider#getSourceDirectory(String)`
+(argument being the book name; it can be the same as the root directory)
 where `{no}` _shall_ be chapter number as a positive integer, starting
 at one, and `{chapter name}` is treated as the name of the chapter.
 These _must_ be separated by a space. Chapters are loaded in order of
@@ -115,6 +122,10 @@ other value as true. All Doubles but 0 are truthy values, while any
 String but an empty one is falsy. `True` and `False` are predefined
 constant variables which will raise an ExecutionException in case their
 modification is attempted, initialized to 1.0 and 0.0 respectively.
+
+There is a `Null` type, evaluating to either empty String or NaN (i.e.
+it's definitely false) which is the default for all variables lacking
+an initial value, including unanswered timed questions.
 
 #### Evaluating expressions
 
