@@ -24,6 +24,8 @@ import rs.lukaj.stories.parser.types.*;
 import rs.lukaj.stories.runtime.Chapter;
 import rs.lukaj.stories.runtime.State;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 import static rs.lukaj.stories.parser.Parser.LineType.*;
@@ -239,27 +241,20 @@ public class Parser {
         return head;
     }
 
-    //todo nesting
     private void setJumps(Chapter chapter) throws InterpretationException {
         Line curr = head;
-        int indent = 0;
-        boolean inside = false;
-        IfStatement conditional = null;
+        Deque<Utils.Pair<Integer, IfStatement>> indentStack = new LinkedList<>();
         while(curr != null) {
             Line next = curr.getNextLine();
             if(curr instanceof GotoStatement && !((GotoStatement)curr).hasSetJump()) {
                 ((GotoStatement)curr).setJump(chapter);
             } //addressing only forward jumps here
 
-            if(!inside && curr instanceof IfStatement) {
-                inside = true;
-                conditional = (IfStatement)curr;
-                indent = conditional.getIndent();
-            } else if(inside) {
-                if(curr.getIndent() <= indent) {
-                    conditional.setNextIfFalse(curr);
-                    inside = false;
-                }
+            while(!indentStack.isEmpty() && curr.getIndent() <= indentStack.peekLast().a) {
+                indentStack.pollLast().b.setNextIfFalse(curr);
+            }
+            if(curr instanceof IfStatement) {
+                indentStack.push(new Utils.Pair<>(curr.getIndent(), (IfStatement) curr));
             }
 
             curr = next;

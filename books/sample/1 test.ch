@@ -22,5 +22,5 @@ character : Well hello there
   character: that's right
 :q!=ansMe?
   char2: nuh-uh
-:ansYou? //this is equivalent to q=ansYou
-  :>question //aand the famous goto
+  :ansYou? //this is equivalent to q=ansYou
+    :>question //aand the famous goto
