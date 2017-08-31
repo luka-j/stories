@@ -33,10 +33,11 @@ public class Parser {
     public enum LineType {
         ANSWER {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
                 Question question = (Question)additionalParams[0];
                 if(question == null) throw new InterpretationException("Creating answer without the question");
-                String[] tokens = line.trim().substring(2).split("\\s*]\\s*", 2);
+                String[] tokens = line.substring(2).split("\\s*]\\s*", 2);
                 if(tokens.length < 2)
                     throw new InterpretationException("No variable for answer");
                 if(chapter.imageExists(tokens[1])) {
@@ -55,20 +56,25 @@ public class Parser {
         },
         STATEMENT {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                return Statement.create(chapter, line.trim(), Utils.countLeadingSpaces(line));
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                if(line.startsWith(":")) line = line.substring(1);
+                //^ it doesn't have to start with : - e.g. in statement blocks
+                return Statement.create(chapter, line, indent);
             }
         },
         NARRATIVE {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                return new Narrative(chapter, line.trim(), Utils.countLeadingSpaces(line));
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                return new Narrative(chapter, line, indent);
             }
         },
         QUESTION {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                String[] parts = line.trim().substring(1).split("\\s*:\\s*", 2);
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                String[] parts = line.substring(1).split("\\s*:\\s*", 2);
                 if(parts.length < 2)
                     throw new InterpretationException("Invalid question syntax; missing :");
                 String text = parts[1];
@@ -79,7 +85,6 @@ public class Parser {
                 if(var == null) throw new InterpretationException("Variable name for question is empty");
                 charName = charName.trim(); //this shouldn't be null (both ] and : must exist, otherwise NPE would be thrown earlier)
                 var = var.trim();
-                int indent = Utils.countLeadingSpaces(line);
 
                 if(time == null) {
                     return new Question(chapter, var, text, charName, indent);
@@ -102,34 +107,47 @@ public class Parser {
         },
         SPEECH {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                String[] parts = line.trim().split("\\s*:\\s*", 2);
-                return new Speech(chapter, parts[0], parts[1], Utils.countLeadingSpaces(line));
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                String[] parts = line.split("\\s*:\\s*", 2);
+                return new Speech(chapter, parts[0], parts[1], indent);
             }
         },
         INPUT {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                String[] parts = line.trim().split("\\s*]\\s*", 2);
-                return new TextInput(chapter, parts[0].substring(1), parts[1], Utils.countLeadingSpaces(line));
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                String[] parts = line.split("\\s*]\\s*", 2);
+                return new TextInput(chapter, parts[0].substring(1), parts[1], indent);
             }
         },
         COMMENT {
             @Override
-            public Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                return null; //this is a no-op
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                return new Nop(chapter, indent); //this is a no-op
+            }
+        },
+        STATEMENT_BLOCK_MARKER {
+            @Override
+            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                    throws InterpretationException {
+                return new Nop(chapter, Utils.countLeadingSpaces(line));
             }
         };
 
-        public abstract Line parse(String line, Chapter chapter, Object... additionalParams) throws InterpretationException;
+        public abstract Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+                throws InterpretationException;
 
 
-        public static LineType getType(String line, State state, boolean escaped) throws InterpretationException {
-            line = line.trim();
+        public static LineType getType(String line, State state, boolean escaped, boolean insideStatementBlock)
+                throws InterpretationException {
             if(line.isEmpty()) throw new InterpretationException("Empty line");
             if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
-            if(!escaped && line.startsWith(":"))
+            if(!escaped && line.startsWith(":::"))
+                return STATEMENT_BLOCK_MARKER;
+            if(!escaped && (insideStatementBlock || line.startsWith(":")))
                 return STATEMENT;
             if(!escaped && line.startsWith("?"))
                 return QUESTION;
@@ -147,7 +165,8 @@ public class Parser {
     private Line previousLine;
     private Line head;
     private boolean finished = false;
-
+    private boolean insideStatementBlock;
+    private int statementBlockIndent;
 
 
     public Line parse(List<String> lines, Chapter chapter) throws InterpretationException {
@@ -160,20 +179,52 @@ public class Parser {
         }
     }
 
+    private String stripComments(String line) {
+        int firstOccurence = line.indexOf("//");
+        if(firstOccurence < 0) return line;
+        if(line.charAt(firstOccurence-1) != '\\') return line.substring(0, firstOccurence).trim();
+
+        int i = firstOccurence+2;
+        StringBuilder res = new StringBuilder(line.length());
+        for(int s=0; s<i; s++) res.append(line.charAt(s));
+        for(;i<line.length()-1;i++) {
+            if(line.charAt(i) == '/' && line.charAt(i+1) == '/' && line.charAt(i-1) != '\\')
+                break;
+            else
+                res.append(line.charAt(i));
+        }
+        for(i = res.length()-1; i>=0 && Character.isWhitespace(i); i--)
+            res.deleteCharAt(i);
+        return res.toString();
+    }
+
+    //this is one mess of a method honestly
     private void parse(String line, Chapter chapter) throws InterpretationException {
         boolean escaped = false;
+        int indent = Utils.countLeadingSpaces(line);
+        line = line.trim(); // all lines are trimmed at the beginning, and indent is stored separately !!
         if(line.startsWith("\\")) escaped = true;
-        LineType type = getType(line, chapter.getState(), escaped);
-        if(type == COMMENT) return;
         if(escaped) line = line.substring(1);
 
+        LineType type;
+        if(insideStatementBlock && indent <= statementBlockIndent)
+            insideStatementBlock = false;
+        type = getType(line, chapter.getState(), escaped, insideStatementBlock);
+
+        if(type == COMMENT) return;
+        if(type == STATEMENT_BLOCK_MARKER) {
+            insideStatementBlock = true;
+            statementBlockIndent = indent;
+            return;
+        }
+
         int commIndex = line.indexOf("//");
-        if(commIndex >= 0) line = line.substring(0, commIndex);
+        if(commIndex >= 0) line = stripComments(line);
         Line current;
         if(type == ANSWER) {
-            current = type.parse(line, chapter, previousQuestion);
+            current = type.parse(line, indent, chapter, previousQuestion);
         } else {
-            current = type.parse(line, chapter);
+            current = type.parse(line, indent, chapter);
         }
         if(head == null) head = current;
         if(previousLine != null && previousLine != current) previousLine.setNextLine(current);
@@ -188,6 +239,7 @@ public class Parser {
         return head;
     }
 
+    //todo nesting
     private void setJumps(Chapter chapter) throws InterpretationException {
         Line curr = head;
         int indent = 0;
@@ -204,11 +256,9 @@ public class Parser {
                 conditional = (IfStatement)curr;
                 indent = conditional.getIndent();
             } else if(inside) {
-                if(curr.getIndent() == indent) {
+                if(curr.getIndent() <= indent) {
                     conditional.setNextIfFalse(curr);
                     inside = false;
-                } else if(curr.getIndent() < indent) {
-                    throw new InterpretationException("Bad indent inside if-statement body (:?)");
                 }
             }
 

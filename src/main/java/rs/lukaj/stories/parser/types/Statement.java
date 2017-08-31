@@ -31,7 +31,6 @@ public abstract class Statement extends Line {
     }
 
     public static Statement create(Chapter chapter, String statement, int indent) throws InterpretationException {
-        statement = statement.substring(1);
         if(statement.endsWith("?"))
             return new IfStatement(chapter, statement, indent);
         if(statement.endsWith(":")) {
