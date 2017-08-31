@@ -20,7 +20,7 @@ package rs.lukaj.stories.parser.types;
 
 import rs.lukaj.stories.runtime.State;
 
-public interface AnswerLike {
+public interface AnswerLike<T> {
     String getVariable();
-    Object getContent(State state);
+    T getContent(State state);
 }

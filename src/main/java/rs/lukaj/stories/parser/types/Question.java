@@ -30,9 +30,9 @@ import java.util.List;
  */
 public class Question extends Line {
     protected String variable;
-    protected String text;
+    private String text;
     protected String character;
-    protected List<AnswerLike> answers = new ArrayList<>();
+    private List<AnswerLike> answers = new ArrayList<>();
     private boolean containsPictures;
     private double time;
 
@@ -70,13 +70,13 @@ public class Question extends Line {
         return nextLine;
     }
 
-    protected int displayQuestion() {
+    private int displayQuestion() {
         String[] answers = new String[this.answers.size()];
         for(int i = 0; i< this.answers.size(); i++) answers[i] = this.answers.get(i).getContent(chapter.getState()).toString();
         return chapter.getDisplay().showQuestion(text, character, getAvatar(character), time, answers);
     }
 
-    protected int displayPictureQuestion() {
+    private int displayPictureQuestion() {
         File[] answers = new File[this.answers.size()];
         for(int i = 0; i< this.answers.size(); i++) answers[i] = ((PictureAnswer) this.answers.get(i)).getPicture();
         return chapter.getDisplay().showPictureQuestion(text, character, getAvatar(character), time, answers);

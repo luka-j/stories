@@ -26,7 +26,7 @@ import java.io.File;
 /**
  * Created by luka on 4.6.17..
  */
-public class PictureAnswer implements AnswerLike {
+public class PictureAnswer implements AnswerLike<File> {
     private String variable;
     private File picture;
 
@@ -48,7 +48,7 @@ public class PictureAnswer implements AnswerLike {
     }
 
     @Override
-    public Object getContent(State state) {
+    public File getContent(State state) {
         return getPicture();
     }
 }

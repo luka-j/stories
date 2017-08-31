@@ -28,6 +28,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import static rs.lukaj.stories.Utils.Pair;
 import static rs.lukaj.stories.parser.Parser.LineType.*;
 
 public class Parser {
@@ -144,7 +145,7 @@ public class Parser {
 
         public static LineType getType(String line, State state, boolean escaped, boolean insideStatementBlock)
                 throws InterpretationException {
-            if(line.isEmpty()) throw new InterpretationException("Empty line");
+            if(!escaped && line.isEmpty()) return COMMENT;
             if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
             if(!escaped && line.startsWith(":::"))
@@ -243,7 +244,7 @@ public class Parser {
 
     private void setJumps(Chapter chapter) throws InterpretationException {
         Line curr = head;
-        Deque<Utils.Pair<Integer, IfStatement>> indentStack = new LinkedList<>();
+        Deque<Pair<Integer, IfStatement>> indentStack = new LinkedList<>();
         while(curr != null) {
             Line next = curr.getNextLine();
             if(curr instanceof GotoStatement && !((GotoStatement)curr).hasSetJump()) {
@@ -254,7 +255,7 @@ public class Parser {
                 indentStack.pollLast().b.setNextIfFalse(curr);
             }
             if(curr instanceof IfStatement) {
-                indentStack.push(new Utils.Pair<>(curr.getIndent(), (IfStatement) curr));
+                indentStack.push(new Pair<>(curr.getIndent(), (IfStatement) curr));
             }
 
             curr = next;

@@ -26,7 +26,7 @@ import rs.lukaj.stories.runtime.State;
 /**
  * Created by luka on 3.6.17..
  */
-public class Answer implements AnswerLike {
+public class Answer implements AnswerLike<String> {
     protected String variable;
     protected String text;
 
@@ -41,7 +41,7 @@ public class Answer implements AnswerLike {
     }
 
     @Override
-    public Object getContent(State state) {
+    public String getContent(State state) {
         return getText(state);
     }
 

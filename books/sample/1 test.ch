@@ -2,8 +2,8 @@
  #not really representative
 
 Hello World!
-\??? //backslash is an escape character: everything starting with a backslash is either speech or narrative
-This is \//not a comment //this is, though
+\??? //everything starting with a backslash is either speech or narrative
+This is \//not a comment //this is, though, because backslash is usually an escape character all-round
 :char2, character
 //we need to declare characters before using them; colon denotes a procedural statement
 character : Well hello there
@@ -12,7 +12,7 @@ character : Well hello there
     //except comments, is treated as a statement
     res=sqrt(10)+3
     5<res?
-      \You can do math, congrats! //backslash, however, has precedence!
+      \You can do math, congrats! //backslash, however, always has precedence!
 
 :question: //this is a label
 ?[q]character: Who's the best //a question, whose answer is stored in variable q

@@ -19,18 +19,27 @@
 package rs.lukaj.stories.parser.types;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.parser.Type;
 import rs.lukaj.stories.runtime.Chapter;
 
 /**
  * Created by luka on 4.6.17..
  */
 public class GotoStatement extends Statement {
+    private Expressions condition;
     private String targetLabel;
     private Line jumpTo;
 
     protected GotoStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
         super(chapter, indent);
-        targetLabel = statement.substring(1);
+        if(!statement.contains("?")) {
+            targetLabel = statement.substring(1);
+        } else {
+            String[] tokens = statement.substring(1).split("\\s*\\?\\s*", 2);
+            condition = new Expressions(tokens[0], chapter.getState());
+            targetLabel = tokens[1];
+        }
         Line target = chapter.getLabel(targetLabel);
         if(target != null) //if there are multiple same labels, prefer closest previous
             jumpTo = target;
@@ -38,7 +47,12 @@ public class GotoStatement extends Statement {
 
     @Override
     public Line execute() {
-        return jumpTo;
+        if(condition == null)
+            return jumpTo;
+        else if(Type.isTruthy(condition.eval()))
+            return jumpTo;
+        else
+            return nextLine;
     }
 
     public boolean hasSetJump() {
