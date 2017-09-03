@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -52,10 +51,6 @@ public class Chapter {
 
     public Line compile() throws IOException, InterpretationException {
         List<String> lines = Utils.readAllLines(source);
-        Iterator<String> it = lines.iterator();
-        while(it.hasNext())
-            if(it.next().trim().isEmpty())
-                it.remove();
         if(lines.isEmpty()) throw new InterpretationException("File is empty!");
 
         Parser parser = new Parser();

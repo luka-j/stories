@@ -18,21 +18,29 @@
 
 package rs.lukaj.stories.parser;
 
+import java.util.List;
+
 public enum Type {
-    NULL(Void.class, "N", false, false),
-    STRING(String.class, "S", false, false),
-    DOUBLE(Double.class, "D", false, true),
-    CONSTANT_DOUBLE(Double.class, "C", true, true);
+    NULL(Void.class, "N", 0),
+    STRING(String.class, "S", 0),
+    DOUBLE(Double.class, "D", P.NUMERIC),
+    STRING_LIST(List.class, "S[", P.LIST),
+    CONSTANT_DOUBLE(Double.class, "C", P.NUMERIC | P.CONST);
+
+    public static class P {
+        public static final int CONST = 1;
+        public static final int NUMERIC = 1 << 1;
+        public static final int LIST = 1 << 2;
+    }
 
     public final Class typeClass;
     public final String mark;
-    public final boolean isConst;
-    public final boolean isNumeric;
-    Type(Class typeClass, String mark, boolean isConst, boolean isNumeric) {
+    public final long properties;
+
+    Type(Class typeClass, String mark, int properties) {
         this.typeClass = typeClass;
         this.mark = mark;
-        this.isConst = isConst;
-        this.isNumeric = isNumeric;
+        this.properties = properties;
     }
 
     public static boolean isTruthy(Object value) {
@@ -42,6 +50,8 @@ public enum Type {
         } else if(value instanceof String) {
             String str = value.toString();
             return !str.isEmpty();
+        } else if(value instanceof List) {
+            return !((List) value).isEmpty();
         } else {
             return false; //this can be thought about... later
         }
@@ -52,5 +62,9 @@ public enum Type {
             if(t.mark.equals(mark))
                 return t;
         return null;
+    }
+
+    public boolean is(long prop) {
+        return (properties&prop) != 0;
     }
 }

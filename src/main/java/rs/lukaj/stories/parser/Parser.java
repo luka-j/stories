@@ -187,17 +187,21 @@ public class Parser {
         if(firstOccurence < 0) return line;
         if(line.charAt(firstOccurence-1) != '\\') return line.substring(0, firstOccurence).trim();
 
-        int i = firstOccurence+2;
+        int i = firstOccurence-1;
         StringBuilder res = new StringBuilder(line.length());
         for(int s=0; s<i; s++) res.append(line.charAt(s));
         for(;i<line.length()-1;i++) {
-            if(line.charAt(i) == '/' && line.charAt(i+1) == '/' && line.charAt(i-1) != '\\')
+            if(i+2<line.length())
+                if(line.charAt(i) == '\\' && line.charAt(i+1) == '/' && line.charAt(i+2) == '/')
+                    continue;
+            else if(line.charAt(i) == '/' && line.charAt(i+1) == '/' && line.charAt(i-1) != '\\')
                 break;
             else
                 res.append(line.charAt(i));
         }
         for(i = res.length()-1; i>=0 && Character.isWhitespace(i); i--)
             res.deleteCharAt(i);
+
         return res.toString();
     }
 

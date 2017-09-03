@@ -31,41 +31,47 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
+
+import static rs.lukaj.stories.parser.Type.*;
+import static rs.lukaj.stories.parser.Type.P.CONST;
+import static rs.lukaj.stories.parser.Type.P.NUMERIC;
 
 /**
  * Created by luka on 3.6.17..
  */
 public class State implements VariableProvider {
 
-    private static class Value {
+    @SuppressWarnings("unchecked") //we do sorcery here
+    private static class Value<T> {
 
         private static final String SEP = "/";
 
         private final Type type;
-        private final Object value;
+        private final T value;
 
-        private Value(Type type, Object value) {
-            if(type.typeClass.isInstance(type)) throw new ClassCastException("Mismatched value type: expected " + type.typeClass.getName() + ", got " + value);
+        private Value(Type type, T value) {
+            if(type != NULL && !type.typeClass.isInstance(value))
+                throw new ClassCastException("Mismatched value type: expected " + type.typeClass.getName() + ", got " + value);
             this.type = type;
             this.value = value;
         }
 
         private Value(String fromString) {
             String[] fields = fromString.split(SEP, 2);
-            type = Type.getByMark(fields[0]);
+            type = getByMark(fields[0]);
             if(type == null) throw new LoadingException("State file is corrupted: invalid type mark " + fields[0]);
             switch (type) {
                 case STRING:
-                    value = fields[1];
+                    value = (T)fields[1];
                     break;
                 case DOUBLE:
                 case CONSTANT_DOUBLE:
-                    value = Double.parseDouble(fields[1]);
+                    value = (T)(Double)Double.parseDouble(fields[1]);
+                    break;
+                case STRING_LIST:
+                    value = (T) Arrays.asList(fields[1].split("\u001c"));
                     break;
                 case NULL:
                     value = null;
@@ -82,6 +88,8 @@ public class State implements VariableProvider {
                 case DOUBLE:
                 case CONSTANT_DOUBLE:
                     return value.toString();
+                case STRING_LIST:
+                    return value.toString();
                 case NULL:
                     return "";
                 default:
@@ -90,7 +98,16 @@ public class State implements VariableProvider {
         }
 
         public String serialize() {
-            return type.mark + SEP + String.valueOf(value);
+            if(type == STRING_LIST) {
+                StringBuilder sb = new StringBuilder(64);
+                sb.append(type.mark).append(SEP);
+                List<String> list = (List<String>) value;
+                for(String s : list)
+                    sb.append(s).append('\u001c');
+                return sb.toString();
+            } else {
+                return type.mark + SEP + String.valueOf(value);
+            }
         }
     }
 
@@ -111,11 +128,11 @@ public class State implements VariableProvider {
 
 
     private void setPredefinedConstants() {
-        variables.put("True", new Value(Type.CONSTANT_DOUBLE, 1.));
-        variables.put("False", new Value(Type.CONSTANT_DOUBLE, 0.));
+        variables.put("True", new Value<>(CONSTANT_DOUBLE, 1.));
+        variables.put("False", new Value<>(CONSTANT_DOUBLE, 0.));
     }
 
-    protected State() {
+    public State() {
         setPredefinedConstants();
     }
 
@@ -129,7 +146,7 @@ public class State implements VariableProvider {
     }
 
     private void checkCanModify(String name) {
-        if(variables.containsKey(name) && variables.get(name).type.isConst)
+        if(variables.containsKey(name) && variables.get(name).type.is(CONST))
             throw new ExecutionException("Attempting to modify a const value");
     }
 
@@ -149,25 +166,58 @@ public class State implements VariableProvider {
     public void declareVariable(String name) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
-        variables.put(name, new Value(Type.NULL, null));
+        variables.put(name, new Value<>(Type.NULL, null));
     }
 
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
-        variables.put(name, new Value(Type.STRING, value));
+        variables.put(name, new Value<>(Type.STRING, value));
     }
 
     public void setVariable(String name, boolean value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
-        variables.put(name, new Value(Type.DOUBLE, value? 1. : 0.));
+        variables.put(name, new Value<>(Type.DOUBLE, value? 1. : 0.));
     }
 
     public void setVariable(String name, double value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
-        variables.put(name, new Value(Type.DOUBLE, value));
+        variables.put(name, new Value<>(Type.DOUBLE, value));
+    }
+
+    private Value<List<String>> getStringList(String listName) throws InterpretationException {
+        checkName(listName);
+        checkCanModify(listName);
+        Value<List<String>> list = variables.get(listName);
+        if(list == null) return null;
+        if(list.type != STRING_LIST)
+            throw new ExecutionException("Attempting to append to non-list variable");
+        return list;
+    }
+
+    public void addToList(String listName, String value) throws InterpretationException {
+        Value<List<String>> list = getStringList(listName);
+        if(list == null) {
+            List<String> newList = new ArrayList<>();
+            newList.add(value);
+            variables.put(listName, new Value<>(Type.STRING_LIST, newList));
+        } else {
+            list.value.add(value);
+        }
+    }
+
+    public String getFromList(String listName, int index) throws InterpretationException {
+        Value<List<String>> list = getStringList(listName);
+        if(list == null || list.value.size() > index) return null;
+        return list.value.get(index);
+    }
+
+    public void removeFromList(String listName, int index) throws InterpretationException {
+        Value<List<String>> list = getStringList(listName);
+        if(list == null || list.value.size() > index) return;
+        else list.value.remove(index);
     }
 
     public void setFlag(String name) throws InterpretationException {
@@ -214,7 +264,7 @@ public class State implements VariableProvider {
 
     public boolean isNumeric(String name) {
         if(variables.get(name) == null) return false;
-        return variables.get(name).type.isNumeric;
+        return variables.get(name).type.is(NUMERIC);
     }
 
     @Override
