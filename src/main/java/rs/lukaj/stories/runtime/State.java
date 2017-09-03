@@ -187,7 +187,7 @@ public class State implements VariableProvider {
         variables.put(name, new Value<>(Type.DOUBLE, value));
     }
 
-    private Value<List<String>> getStringList(String listName) throws InterpretationException {
+    private Value<List<String>> getStringListImpl(String listName) throws InterpretationException {
         checkName(listName);
         checkCanModify(listName);
         Value<List<String>> list = variables.get(listName);
@@ -198,7 +198,7 @@ public class State implements VariableProvider {
     }
 
     public void addToList(String listName, String value) throws InterpretationException {
-        Value<List<String>> list = getStringList(listName);
+        Value<List<String>> list = getStringListImpl(listName);
         if(list == null) {
             List<String> newList = new ArrayList<>();
             newList.add(value);
@@ -209,15 +209,21 @@ public class State implements VariableProvider {
     }
 
     public String getFromList(String listName, int index) throws InterpretationException {
-        Value<List<String>> list = getStringList(listName);
+        Value<List<String>> list = getStringListImpl(listName);
         if(list == null || list.value.size() > index) return null;
         return list.value.get(index);
     }
 
     public void removeFromList(String listName, int index) throws InterpretationException {
-        Value<List<String>> list = getStringList(listName);
+        Value<List<String>> list = getStringListImpl(listName);
         if(list == null || list.value.size() > index) return;
         else list.value.remove(index);
+    }
+
+    public ArrayList<String> getStringList(String name) throws InterpretationException {
+        Value<List<String>> list = getStringListImpl(name);
+        if(list == null) return new ArrayList<>();
+        return new ArrayList<>(list.value);
     }
 
     public void setFlag(String name) throws InterpretationException {
