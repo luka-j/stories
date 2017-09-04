@@ -81,8 +81,6 @@ public class Book {
             chapters.add(new File(sourceDir, children[i]));
             chapterNames.add(getChapterName(children[i]));
         }
-
-        reloadBookInfo();
     }
 
     /**
@@ -182,6 +180,15 @@ public class Book {
     }
 
     public State getBookInfo() {
+        if(info == null) reloadBookInfo();
         return info;
+    }
+
+    public File getStateFile() {
+        return new File(files.getRootDirectory(name), STATE_FILENAME);
+    }
+
+    public File getInfoFile() {
+        return new File(files.getRootDirectory(name), METADATA_FILENAME);
     }
 }

@@ -74,7 +74,7 @@ public class State implements VariableProvider {
                     value = (T)(Double)Double.parseDouble(fields[1]);
                     break;
                 case STRING_LIST:
-                    value = (T) Arrays.asList(fields[1].split(ARRAY_SEPARATOR));
+                    value = (T) new ArrayList<>(Arrays.asList(fields[1].split(ARRAY_SEPARATOR)));
                     break;
                 case NULL:
                     value = null;
@@ -243,6 +243,13 @@ public class State implements VariableProvider {
         Value<List<String>> list = getStringListImpl(listName);
         if(list == null || list.value.size() >= index) return;
         else list.value.remove(index);
+    }
+
+    public void replaceInList(String listName, int index, String newValue) throws InterpretationException {
+        Value<List<String>> list = getStringListImpl(listName);
+        if(list == null) addToList(listName, newValue);
+        else if(list.value.size() >= index) list.value.add(newValue);
+        else list.value.set(index, newValue);
     }
 
     /**
