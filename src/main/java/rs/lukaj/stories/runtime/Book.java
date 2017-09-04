@@ -117,7 +117,7 @@ public class Book {
      * Start book from a certain chapter
      * @param chapterNo chapter, 1-based
      * @return First line of the chapter
-     * @throws InterpretationException
+     * @throws InterpretationException if chapter fails to be parsed
      */
     private Line startFrom(int chapterNo) throws InterpretationException {
         chapterNo--;

@@ -93,7 +93,7 @@ public class Runtime {
      * to execute.
      * @param restart whether the book should start from the beginning or from where the
      *                user left off
-     * @throws InterpretationException
+     * @throws InterpretationException if any of the {@link Book} methods throw InterpretationException
      */
     public void executeInTightLoop(boolean restart) throws InterpretationException {
         if(restart) restartBook();

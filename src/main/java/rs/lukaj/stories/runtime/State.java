@@ -238,7 +238,6 @@ public class State implements VariableProvider {
      * Removes a member from {@link Type#STRING_LIST} if it exists.
      * @param listName name of the list
      * @param index index of the member to be removed
-     * @return
      */
     public void removeFromList(String listName, int index) {
         Value<List<String>> list = getStringListImpl(listName);
@@ -251,7 +250,7 @@ public class State implements VariableProvider {
      * list exists, an empty one is returned. Returned object is a copy,
      * i.e. it can be freely manipuleted without affecting the original list.
      * @param name list name
-     * @return
+     * @return ArrayList representation of this variable
      */
     public ArrayList<String> getStringList(String name) {
         Value<List<String>> list = getStringListImpl(name);
