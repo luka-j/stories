@@ -130,11 +130,17 @@ public class State implements VariableProvider {
     }
 
 
+
+    private Map<String, Value> variables = new HashMap<>();
+
     private void setPredefinedConstants() {
         variables.put("True", new Value<>(CONSTANT_DOUBLE, 1.));
         variables.put("False", new Value<>(CONSTANT_DOUBLE, 0.));
     }
 
+    /**
+     * Creates an empty state object, with only predefined constants present.
+     */
     public State() {
         setPredefinedConstants();
     }
@@ -164,8 +170,6 @@ public class State implements VariableProvider {
         out.close();
     }
 
-    private Map<String, Value> variables = new HashMap<>();
-
     public void declareVariable(String name) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
@@ -190,9 +194,7 @@ public class State implements VariableProvider {
         variables.put(name, new Value<>(Type.DOUBLE, value));
     }
 
-    private Value<List<String>> getStringListImpl(String listName) throws InterpretationException {
-        checkName(listName);
-        checkCanModify(listName);
+    private Value<List<String>> getStringListImpl(String listName) {
         Value<List<String>> list = variables.get(listName);
         if(list == null) return null;
         if(list.type != STRING_LIST)
@@ -201,6 +203,8 @@ public class State implements VariableProvider {
     }
 
     public void addToList(String listName, String value) throws InterpretationException {
+        checkName(listName);
+        checkCanModify(listName);
         Value<List<String>> list = getStringListImpl(listName);
         if(list == null) {
             List<String> newList = new ArrayList<>();
@@ -211,19 +215,45 @@ public class State implements VariableProvider {
         }
     }
 
-    public String getFromList(String listName, int index) throws InterpretationException {
+    public void putList(String name, List<String> list) throws InterpretationException {
+        checkName(name);
+        checkCanModify(name);
+        Value<List<String>> value = new Value<>(Type.STRING_LIST, list);
+        variables.put(name, value);
+    }
+    /**
+     * Retrieves a member from {@link Type#STRING_LIST}. If list doesn't exist,
+     * or index is out of bounds, null is returned.
+     * @param listName name of the list
+     * @param index index of the desired member
+     * @return listName[index]
+     */
+    public String getFromList(String listName, int index) {
         Value<List<String>> list = getStringListImpl(listName);
-        if(list == null || list.value.size() > index) return null;
+        if(list == null || list.value.size() >= index) return null;
         return list.value.get(index);
     }
 
-    public void removeFromList(String listName, int index) throws InterpretationException {
+    /**
+     * Removes a member from {@link Type#STRING_LIST} if it exists.
+     * @param listName name of the list
+     * @param index index of the member to be removed
+     * @return
+     */
+    public void removeFromList(String listName, int index) {
         Value<List<String>> list = getStringListImpl(listName);
-        if(list == null || list.value.size() > index) return;
+        if(list == null || list.value.size() >= index) return;
         else list.value.remove(index);
     }
 
-    public ArrayList<String> getStringList(String name) throws InterpretationException {
+    /**
+     * Returns a {@link Type#STRING_LIST} with this name. In case no such
+     * list exists, an empty one is returned. Returned object is a copy,
+     * i.e. it can be freely manipuleted without affecting the original list.
+     * @param name list name
+     * @return
+     */
+    public ArrayList<String> getStringList(String name) {
         Value<List<String>> list = getStringListImpl(name);
         if(list == null) return new ArrayList<>();
         return new ArrayList<>(list.value);
