@@ -82,14 +82,7 @@ public class Book {
             chapterNames.add(getChapterName(children[i]));
         }
 
-        File infoFile = new File(rootDir, METADATA_FILENAME);
-        if(infoFile.isFile()) {
-            try {
-                info = new State(infoFile);
-            } catch (IOException e) {
-                throw new LoadingException("Failed to load metadata", e);
-            }
-        }
+        reloadBookInfo();
     }
 
     /**
@@ -175,6 +168,17 @@ public class Book {
 
     public State getState() {
         return state;
+    }
+
+    public void reloadBookInfo() {
+        File infoFile = new File(files.getRootDirectory(name), METADATA_FILENAME);
+        if(infoFile.isFile()) {
+            try {
+                info = new State(infoFile);
+            } catch (IOException e) {
+                throw new LoadingException("Failed to load metadata", e);
+            }
+        }
     }
 
     public State getBookInfo() {

@@ -46,6 +46,9 @@ public class State implements VariableProvider {
     @SuppressWarnings("unchecked") //we do sorcery here
     private static class Value<T> {
 
+        private static final char ARRAY_SEPARATOR_CHAR = '\u001c';
+        private static final String ARRAY_SEPARATOR = ARRAY_SEPARATOR_CHAR + "";
+
         private static final String SEP = "/";
 
         private final Type type;
@@ -71,7 +74,7 @@ public class State implements VariableProvider {
                     value = (T)(Double)Double.parseDouble(fields[1]);
                     break;
                 case STRING_LIST:
-                    value = (T) Arrays.asList(fields[1].split("\u001c"));
+                    value = (T) Arrays.asList(fields[1].split(ARRAY_SEPARATOR));
                     break;
                 case NULL:
                     value = null;
@@ -103,7 +106,7 @@ public class State implements VariableProvider {
                 sb.append(type.mark).append(SEP);
                 List<String> list = (List<String>) value;
                 for(String s : list)
-                    sb.append(s).append('\u001c');
+                    sb.append(s).append(ARRAY_SEPARATOR_CHAR);
                 return sb.toString();
             } else {
                 return type.mark + SEP + String.valueOf(value);
@@ -150,7 +153,7 @@ public class State implements VariableProvider {
             throw new ExecutionException("Attempting to modify a const value");
     }
 
-    protected void saveToFile(File file) throws IOException {
+    public void saveToFile(File file) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(file));
         for(Map.Entry<String, Value> e : variables.entrySet()) {
             out.write(e.getKey());
