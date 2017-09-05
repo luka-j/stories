@@ -31,6 +31,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -83,6 +84,7 @@ public class State implements VariableProvider {
             }
         }
 
+        private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
         @Override
         public String toString() {
             switch (type) {
@@ -90,7 +92,7 @@ public class State implements VariableProvider {
                     return (String)value;
                 case DOUBLE:
                 case CONSTANT_DOUBLE:
-                    return value.toString();
+                    return FORMAT.format(value);
                 case STRING_LIST:
                     return value.toString();
                 case NULL:
@@ -179,6 +181,7 @@ public class State implements VariableProvider {
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
+        if(value.startsWith("'")) value = value.substring(1);
         variables.put(name, new Value<>(Type.STRING, value));
     }
 
