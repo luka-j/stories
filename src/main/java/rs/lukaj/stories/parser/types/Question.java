@@ -36,12 +36,14 @@ public class Question extends Line {
     private boolean containsPictures;
     private double time;
 
-    public Question(Chapter chapter, String variable, String text, String character, int indent) throws InterpretationException {
-        this(chapter, variable, text, character, 0, indent);
+    public Question(Chapter chapter, String variable, String text, String character,
+                    int lineNumber, int indent) throws InterpretationException {
+        this(chapter, variable, text, character, 0, lineNumber, indent);
     }
 
-    protected Question(Chapter chapter, String variable, String text, String character, double time, int indent) throws InterpretationException {
-        super(chapter, indent);
+    protected Question(Chapter chapter, String variable, String text, String character, double time,
+                       int lineNumber, int indent) throws InterpretationException {
+        super(chapter, lineNumber, indent);
         chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.text = text;

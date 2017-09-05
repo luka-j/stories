@@ -29,8 +29,9 @@ public class TextInput extends Line {
     protected String variable;
     protected String hint;
 
-    public TextInput(Chapter chapter, String variable, String hint, int indent) throws InterpretationException {
-        super(chapter, indent);
+    public TextInput(Chapter chapter, String variable, String hint, int lineNumber,
+                     int indent) throws InterpretationException {
+        super(chapter, lineNumber, indent);
         State.checkName(variable);
         this.variable = variable;
         this.hint = hint;

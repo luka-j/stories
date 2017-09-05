@@ -24,8 +24,9 @@ import rs.lukaj.stories.runtime.Chapter;
 public class LabelStatement extends Statement {
     private String label;
 
-    protected LabelStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
-        super(chapter, indent);
+    protected LabelStatement(Chapter chapter, String statement, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         if(statement.contains("?")) throw new InterpretationException("Label shouldn't have question marks!");
         label = statement.substring(0, statement.length()-1);
     }

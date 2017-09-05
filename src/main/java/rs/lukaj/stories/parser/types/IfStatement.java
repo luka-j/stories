@@ -30,8 +30,9 @@ public class IfStatement extends Statement {
     private Line endIf;
     private Expressions expression;
 
-    protected IfStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
-        super(chapter, indent);
+    protected IfStatement(Chapter chapter, String statement, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         this.expression = new Expressions(statement.substring(0, statement.length()-1), chapter.getState());
 
     }

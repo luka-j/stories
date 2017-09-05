@@ -57,8 +57,9 @@ public class AssignStatement extends Statement {
         return assignments;
     }
 
-    protected AssignStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
-        super(chapter, indent);
+    protected AssignStatement(Chapter chapter, String statement, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         List<String> statements = splitAssignments(statement);
         for(String stmt : statements) {
             String[] tokens = stmt.split("=", 2);

@@ -36,7 +36,12 @@ import java.util.List;
 
 public class Book {
     private static final String STATE_FILENAME = ".state";
-    private static final String CURRENT_CHAPTER = "__chapter__";
+    /**
+     * 1-based index of currently executing chapter, updated on chapter end
+     * (i.e. on the end of the first chapter it is set to 2)
+     */
+    protected static final String CURRENT_CHAPTER = "__chapter__";
+    protected static final String CURRENT_LINE = "__line__";
     private static final String METADATA_FILENAME = ".info";
 
     private String name;
@@ -88,12 +93,16 @@ public class Book {
      * If there is no such chapter (i.e. the book has never been played),
      * starts book from the beginning.
      */
-    protected Line resumeBook() throws InterpretationException {
-        return startFrom(state.getOrDefault(CURRENT_CHAPTER, 1).intValue()); //this is legit the dumbest cast ever
+    protected Line resume() throws InterpretationException {
+        return startFrom(state.getOrDefault(CURRENT_CHAPTER, 1).intValue());
     }
-    protected Line restartBook() throws InterpretationException {
+    protected Line restart() throws InterpretationException {
         state = new State();
         return startFrom(1);
+    }
+    protected Line start(int chapterNo) throws InterpretationException {
+        state.setVariable(CURRENT_CHAPTER, chapterNo);
+        return startFrom(chapterNo);
     }
 
     protected void endChapter() throws InterpretationException {

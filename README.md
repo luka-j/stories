@@ -190,6 +190,11 @@ Current state of the book can be obtained using `Book#getState` method.
 
 Special variables _shall_ start and end with at least one underscore.
 
+Special variables used by this library start and end with two underscores.
+Implementations are free to define their variables following the first
+paragraph of this section. Developers writing books are not expected to
+use variables starting and ending with an underscore.
+
 Only special variable present by default at this moment is the chapter
 counter, \_\_chapter\_\_. It is 1-based index of the current chapter and
 is  incremented on each chapter ending and fetched on each chapter

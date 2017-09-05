@@ -25,6 +25,8 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.exceptions.LoadingException;
 import rs.lukaj.stories.parser.types.Line;
 
+import java.io.IOException;
+
 /**
  * Created by luka on 4.6.17..
  */
@@ -46,7 +48,15 @@ public class Runtime {
     }
 
     public void restartBook() throws InterpretationException, LoadingException {
-        current = book.restartBook();
+        current = book.restart();
+    }
+
+    /**
+     * Starts book from the given chapter, overwriting any previous saves.
+     * @param chapterNo 1-based chapter index
+     */
+    public void startChapter(int chapterNo) throws InterpretationException {
+        current = book.start(chapterNo);
     }
 
     /**
@@ -58,10 +68,12 @@ public class Runtime {
     public boolean next() throws ExecutionException {
         try {
             current = current.execute();
+            if(current != null)
+                book.getState().setVariable(Book.CURRENT_LINE, current.getLineNumber());
             return current != null;
         } catch (ExecutionException e) {
             throw e;
-        } catch (RuntimeException e) {
+        } catch (InterpretationException|RuntimeException e) {
             throw new ExecutionException("Unknown execution exception", e);
         }
     }
@@ -74,7 +86,14 @@ public class Runtime {
      * @throws InterpretationException if any exception occurs during interpretation of the code
      */
     public boolean nextChapter() throws InterpretationException, LoadingException {
-        current = book.resumeBook();
+        current = book.resume();
+        return current != null;
+    }
+
+    public boolean resumeBook() throws InterpretationException, LoadingException {
+        current = book.resume();
+        int line = book.getState().getOrDefault(Book.CURRENT_LINE, 0).intValue();
+        while(current != null && current.getLineNumber() < line) current = current.getNextLine();
         return current != null;
     }
 
@@ -97,10 +116,20 @@ public class Runtime {
      */
     public void executeInTightLoop(boolean restart) throws InterpretationException {
         if(restart) restartBook();
-        else if (!nextChapter()) return; //attempting to resume
+        else if (!resumeBook()) return; //attempting to resume
         do {
             while (next()) ;
             endChapter();
         } while (nextChapter());
+    }
+
+    /**
+     * Saves currently executing book's state to file. State is automatically saved
+     * on the end of every chapter, and it can be triggered manually by calling
+     * this method at any time.
+     * @throws IOException in case IOException occurs during saving
+     */
+    public void save() throws IOException {
+        book.getState().saveToFile(book.getStateFile());
     }
 }

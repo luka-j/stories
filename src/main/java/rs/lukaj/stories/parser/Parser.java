@@ -36,7 +36,7 @@ public class Parser {
     public enum LineType {
         ANSWER {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
                 Question question = (Question)additionalParams[0];
                 if(question == null) throw new InterpretationException("Creating answer without the question");
@@ -59,23 +59,23 @@ public class Parser {
         },
         STATEMENT {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
                 if(line.startsWith(":")) line = line.substring(1);
                 //^ it doesn't have to start with : - e.g. in statement blocks
-                return Statement.create(chapter, line, indent);
+                return Statement.create(chapter, line, lineNumber, indent);
             }
         },
         NARRATIVE {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
-                return new Narrative(chapter, line, indent);
+                return new Narrative(chapter, line, lineNumber, indent);
             }
         },
         QUESTION {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
                 String[] parts = line.substring(1).split("\\s*:\\s*", 2);
                 if(parts.length < 2)
@@ -90,7 +90,7 @@ public class Parser {
                 var = var.trim();
 
                 if(time == null) {
-                    return new Question(chapter, var, text, charName, indent);
+                    return new Question(chapter, var, text, charName, lineNumber, indent);
                 } else {
                     double multiplicator=1;
                     if(time.endsWith("ms")) {
@@ -104,42 +104,42 @@ public class Parser {
                         time = time.substring(0, time.length()-1);
                     }
                     double seconds = Double.parseDouble(time) * multiplicator;
-                    return new TimedQuestion(chapter, var, text, charName, seconds, indent);
+                    return new TimedQuestion(chapter, var, text, charName, seconds, lineNumber, indent);
                 }
             }
         },
         SPEECH {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
                 String[] parts = line.split("\\s*:\\s*", 2);
-                return new Speech(chapter, parts[0], parts[1], indent);
+                return new Speech(chapter, parts[0], parts[1], lineNumber, indent);
             }
         },
         INPUT {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
                 String[] parts = line.split("\\s*]\\s*", 2);
-                return new TextInput(chapter, parts[0].substring(1), parts[1], indent);
+                return new TextInput(chapter, parts[0].substring(1), parts[1], lineNumber, indent);
             }
         },
         COMMENT {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
-                return new Nop(chapter, indent); //this is a no-op
+                return new Nop(chapter, lineNumber, indent); //this is a no-op
             }
         },
         STATEMENT_BLOCK_MARKER {
             @Override
-            public Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
-                return new Nop(chapter, Utils.countLeadingSpaces(line));
+                return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line));
             }
         };
 
-        public abstract Line parse(String line, int indent, Chapter chapter, Object... additionalParams)
+        public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                 throws InterpretationException;
 
 
@@ -174,7 +174,8 @@ public class Parser {
 
     public Line parse(List<String> lines, Chapter chapter) throws InterpretationException {
         try {
-            for (String line : lines) parse(line, chapter);
+            int lineNumber = 0;
+            for (String line : lines) parse(line, lineNumber++, chapter);
             setJumps(chapter);
             return getHead();
         } catch (RuntimeException e) {
@@ -206,7 +207,7 @@ public class Parser {
     }
 
     //this is one mess of a method honestly
-    private void parse(String line, Chapter chapter) throws InterpretationException {
+    private void parse(String line, int lineNumber, Chapter chapter) throws InterpretationException {
         boolean escaped = false;
         int indent = Utils.countLeadingSpaces(line);
         line = line.trim(); // all lines are trimmed at the beginning, and indent is stored separately !!
@@ -229,9 +230,9 @@ public class Parser {
         if(commIndex >= 0) line = stripComments(line);
         Line current;
         if(type == ANSWER) {
-            current = type.parse(line, indent, chapter, previousQuestion);
+            current = type.parse(line, lineNumber, indent, chapter, previousQuestion);
         } else {
-            current = type.parse(line, indent, chapter);
+            current = type.parse(line, lineNumber, indent, chapter);
         }
         if(head == null) head = current;
         if(previousLine != null && previousLine != current) previousLine.setNextLine(current);

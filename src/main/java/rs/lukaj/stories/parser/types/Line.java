@@ -31,6 +31,7 @@ public abstract class Line {
     protected final Chapter chapter;
 
     private final int indent;
+    private final int lineNumber;
 
     public abstract Line execute();
 
@@ -38,9 +39,10 @@ public abstract class Line {
         return indent;
     }
 
-    public Line(Chapter chapter, int indent) {
+    public Line(Chapter chapter, int lineNumber, int indent) {
         this.chapter = chapter;
         this.indent = indent;
+        this.lineNumber = lineNumber;
     }
 
     protected File getAvatar(String character) {
@@ -54,5 +56,9 @@ public abstract class Line {
 
     public Line getNextLine() {
         return nextLine;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
     }
 }

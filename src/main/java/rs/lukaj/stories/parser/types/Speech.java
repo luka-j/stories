@@ -30,8 +30,9 @@ public class Speech extends Line {
     protected String character;
     protected String text;
 
-    public Speech(Chapter chapter, String character, String text, int indent) throws InterpretationException {
-        super(chapter, indent);
+    public Speech(Chapter chapter, String character, String text, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         State.checkName(character);
         this.text = text;
         this.character = character;

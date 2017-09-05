@@ -26,21 +26,22 @@ import rs.lukaj.stories.runtime.Chapter;
  */
 public abstract class Statement extends Line {
 
-    protected Statement(Chapter chapter, int indent) {
-        super(chapter, indent);
+    protected Statement(Chapter chapter, int lineNumber, int indent) {
+        super(chapter, lineNumber, indent);
     }
 
-    public static Statement create(Chapter chapter, String statement, int indent) throws InterpretationException {
+    public static Statement create(Chapter chapter, String statement, int lineNumber, int indent)
+            throws InterpretationException {
         if(statement.endsWith("?"))
-            return new IfStatement(chapter, statement, indent);
+            return new IfStatement(chapter, statement, lineNumber, indent);
         if(statement.endsWith(":")) {
-            LabelStatement stmt = new LabelStatement(chapter, statement, indent);
+            LabelStatement stmt = new LabelStatement(chapter, statement, lineNumber, indent);
             chapter.addLabel(stmt.getLabel(), stmt);
             return stmt;
         }
         if(statement.startsWith(">"))
-            return new GotoStatement(chapter, statement, indent);
+            return new GotoStatement(chapter, statement, lineNumber, indent);
         else
-            return new AssignStatement(chapter, statement, indent);
+            return new AssignStatement(chapter, statement, lineNumber, indent);
     }
 }

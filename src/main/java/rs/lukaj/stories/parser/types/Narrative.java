@@ -27,8 +27,8 @@ import rs.lukaj.stories.runtime.Chapter;
 public class Narrative extends Line {
     protected String text;
 
-    public Narrative(Chapter chapter, String text, int indent) {
-        super(chapter, indent);
+    public Narrative(Chapter chapter, String text, int lineNumber, int indent) {
+        super(chapter, lineNumber, indent);
         this.text = text;
     }
 

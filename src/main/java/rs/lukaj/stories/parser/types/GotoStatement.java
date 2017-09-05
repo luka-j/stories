@@ -31,8 +31,9 @@ public class GotoStatement extends Statement {
     private String targetLabel;
     private Line jumpTo;
 
-    protected GotoStatement(Chapter chapter, String statement, int indent) throws InterpretationException {
-        super(chapter, indent);
+    protected GotoStatement(Chapter chapter, String statement, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         if(!statement.contains("?")) {
             targetLabel = statement.substring(1);
         } else {
