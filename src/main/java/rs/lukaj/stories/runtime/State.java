@@ -172,9 +172,16 @@ public class State implements VariableProvider {
         out.close();
     }
 
+    /**
+     * Declares a new variable and sets it to null if it doesn't exist;
+     * if the variable already exists, does nothing
+     * @param name variable name
+     * @throws InterpretationException in case name is invalid
+     */
     public void declareVariable(String name) throws InterpretationException {
+        if(variables.containsKey(name)) return;
         checkName(name);
-        checkCanModify(name);
+        //checkCanModify(name); //not needed - we aren't modifying anything already there
         variables.put(name, new Value<>(Type.NULL, null));
     }
 

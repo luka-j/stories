@@ -139,6 +139,17 @@ public class Parser {
             }
         };
 
+        /**
+         * Parse given string to line. String should be trimmed, stripped of starting
+         * backslashes and comments.
+         * @param line properly formatted string
+         * @param lineNumber this line's number
+         * @param indent indentation of this line
+         * @param chapter chapter this line belongs to
+         * @param additionalParams any additional parameters this line might request
+         * @return parsed Line
+         * @throws InterpretationException in case any error during parsing occurs
+         */
         public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                 throws InterpretationException;
 
@@ -170,13 +181,17 @@ public class Parser {
     private boolean finished = false;
     private boolean insideStatementBlock;
     private int statementBlockIndent;
+    private Chapter chapter;
 
+    public Parser(Chapter chapter) {
+        this.chapter = chapter;
+    }
 
-    public Line parse(List<String> lines, Chapter chapter) throws InterpretationException {
+    public Line parse(List<String> lines) throws InterpretationException {
         try {
             int lineNumber = 0;
-            for (String line : lines) parse(line, lineNumber++, chapter);
-            setJumps(chapter);
+            for (String line : lines) parse(line, lineNumber++);
+            setJumps();
             return getHead();
         } catch (RuntimeException e) {
             throw new InterpretationException("Unknown interpretation exception", e);
@@ -206,8 +221,14 @@ public class Parser {
         return res.toString();
     }
 
+    /**
+     * Parses a single line and appends it to the end, using this Parser's context
+     * @param line String representing this line (including whitespace)
+     * @param lineNumber line number of this line
+     * @throws InterpretationException
+     */
     //this is one mess of a method honestly
-    private void parse(String line, int lineNumber, Chapter chapter) throws InterpretationException {
+    public void parse(String line, int lineNumber) throws InterpretationException {
         boolean escaped = false;
         int indent = Utils.countLeadingSpaces(line);
         line = line.trim(); // all lines are trimmed at the beginning, and indent is stored separately !!
@@ -247,7 +268,7 @@ public class Parser {
         return head;
     }
 
-    private void setJumps(Chapter chapter) throws InterpretationException {
+    private void setJumps() throws InterpretationException {
         Line curr = head;
         Deque<Pair<Integer, IfStatement>> indentStack = new LinkedList<>();
         while(curr != null) {

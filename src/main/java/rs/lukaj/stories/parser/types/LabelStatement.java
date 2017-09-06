@@ -27,7 +27,8 @@ public class LabelStatement extends Statement {
     protected LabelStatement(Chapter chapter, String statement, int lineNumber, int indent)
             throws InterpretationException {
         super(chapter, lineNumber, indent);
-        if(statement.contains("?")) throw new InterpretationException("Label shouldn't have question marks!");
+        if(statement.contains("?") || statement.contains(">"))
+            throw new InterpretationException("Label shouldn't contain ? or >");
         label = statement.substring(0, statement.length()-1);
     }
 

@@ -34,8 +34,8 @@ import java.util.Map;
 public class Chapter {
     private Book book;
     private String name;
-    private State state;
-    private DisplayProvider display;
+    private State state; //'tis should be moved to book
+    private DisplayProvider display; //t'is too
     private File source;
 
     private Map<String, Line> labels = new HashMap<>();
@@ -53,12 +53,15 @@ public class Chapter {
         List<String> lines = Utils.readAllLines(source);
         if(lines.isEmpty()) throw new InterpretationException("File is empty!");
 
-        Parser parser = new Parser();
-        return parser.parse(lines, this);
+        Parser parser = new Parser(this);
+        return parser.parse(lines);
     }
 
     public State getState() {
         return state;
+    }
+    public String getName() {
+        return name;
     }
 
     public DisplayProvider getDisplay() {

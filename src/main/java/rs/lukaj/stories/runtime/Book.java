@@ -53,9 +53,11 @@ public class Book {
     private List<String> chapterNames = new ArrayList<>();
     private State state;
     private File stateFile;
+    private Runtime runtime;
 
-    public Book(String name, FileProvider files, DisplayProvider display) {
+    public Book(String name, Runtime runtime, FileProvider files, DisplayProvider display) {
         this.name = name;
+        this.runtime = runtime;
         this.files = files;
         this.display = display;
         File sourceDir = files.getSourceDirectory(name);
@@ -102,6 +104,7 @@ public class Book {
     }
     protected Line start(int chapterNo) throws InterpretationException {
         state.setVariable(CURRENT_CHAPTER, chapterNo);
+        state.setVariable(CURRENT_LINE, 0);
         return startFrom(chapterNo);
     }
 
@@ -109,6 +112,7 @@ public class Book {
         int current = state.getOrDefault(CURRENT_CHAPTER, 1).intValue();
         try {
             state.setVariable(CURRENT_CHAPTER, current + 1);
+            state.setVariable(CURRENT_LINE, 0);
             state.saveToFile(stateFile);
             display.onChapterEnd(current, chapterNames.get(current-1));
             if(current >= chapters.size())
@@ -135,9 +139,15 @@ public class Book {
         try {
             Chapter chapter = new Chapter(chapterName, this, state, display, source);
             Line begin = chapter.compile();
-            if(chapterNo == 0)
-                display.onBookBegin(name);
-            display.onChapterBegin(chapterNo+1, chapterName);
+            int initialNumber = begin.getLineNumber();
+            int line = state.getOrDefault(CURRENT_LINE, 0).intValue();
+            while(begin != null && begin.getLineNumber() < line) begin = begin.getNextLine();
+
+            if(line <= initialNumber) {
+                if(chapterNo == 0)
+                    display.onBookBegin(name);
+                display.onChapterBegin(chapterNo + 1, chapterName);
+            }
 
             return begin;
         } catch (FileNotFoundException e) {

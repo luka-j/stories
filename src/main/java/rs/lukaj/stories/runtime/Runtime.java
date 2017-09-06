@@ -43,7 +43,7 @@ public class Runtime {
     }
 
     public Book loadBook(String name) throws LoadingException {
-        book = new Book(name, files, display);
+        book = new Book(name, this, files, display);
         return book;
     }
 
@@ -53,6 +53,7 @@ public class Runtime {
 
     /**
      * Starts book from the given chapter, overwriting any previous saves.
+     * This starts the chapter from the beginning.
      * @param chapterNo 1-based chapter index
      */
     public void startChapter(int chapterNo) throws InterpretationException {
@@ -79,7 +80,7 @@ public class Runtime {
     }
 
     /**
-     * Advances the book by one chapter
+     * Advances the book by one chapter, if previous chapter has been completed
      * @return true if next chapter exists, false if it doesn't
      *      Calling this or {@link #next()} method after this method returns false
      *      will yield a NPE
@@ -90,11 +91,14 @@ public class Runtime {
         return current != null;
     }
 
+    /**
+     * Alias for {@link #nextChapter()}. Resumes book according to previous state.
+     * @return whether the end of the book has been reached
+     * @throws InterpretationException if any exception occurs during interpretation of the code
+     * @throws LoadingException if any exception occurs during loading of the book
+     */
     public boolean resumeBook() throws InterpretationException, LoadingException {
-        current = book.resume();
-        int line = book.getState().getOrDefault(Book.CURRENT_LINE, 0).intValue();
-        while(current != null && current.getLineNumber() < line) current = current.getNextLine();
-        return current != null;
+        return nextChapter();
     }
 
     public void endChapter() throws InterpretationException {
@@ -112,13 +116,20 @@ public class Runtime {
      * to execute.
      * @param restart whether the book should start from the beginning or from where the
      *                user left off
+     * @param save whether state should be saved after every statement
      * @throws InterpretationException if any of the {@link Book} methods throw InterpretationException
      */
-    public void executeInTightLoop(boolean restart) throws InterpretationException {
+    public void executeInTightLoop(boolean restart, boolean save) throws InterpretationException {
         if(restart) restartBook();
         else if (!resumeBook()) return; //attempting to resume
         do {
-            while (next()) ;
+            while (next())
+                if(save)
+                    try {
+                        save();
+                    } catch (IOException e) {
+                        throw new ExecutionException("I/O exception while saving state", e);
+                    }
             endChapter();
         } while (nextChapter());
     }
