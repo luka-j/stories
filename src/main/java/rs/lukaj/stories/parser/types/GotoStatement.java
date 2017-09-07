@@ -29,7 +29,7 @@ import rs.lukaj.stories.runtime.Chapter;
 public class GotoStatement extends Statement {
     private Expressions condition;
     private String targetLabel;
-    private Line jumpTo;
+    private LabelStatement jumpTo;
 
     protected GotoStatement(Chapter chapter, String statement, int lineNumber, int indent)
             throws InterpretationException {
@@ -41,18 +41,18 @@ public class GotoStatement extends Statement {
             condition = new Expressions(tokens[0], chapter.getState());
             targetLabel = tokens[1];
         }
-        Line target = chapter.getLabel(targetLabel);
+        LabelStatement target = chapter.getLabel(targetLabel);
         if(target != null) //if there are multiple same labels, prefer closest previous
             jumpTo = target;
     }
 
     @Override
     public Line execute() {
-        if(condition == null)
+        if(condition == null || Type.isTruthy(condition.eval())) {
+            if(jumpTo instanceof ProcedureLabelStatement)
+                ((ProcedureLabelStatement)jumpTo).jumpedFrom = this;
             return jumpTo;
-        else if(Type.isTruthy(condition.eval()))
-            return jumpTo;
-        else
+        } else
             return nextLine;
     }
 

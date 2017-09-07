@@ -35,10 +35,18 @@ public abstract class Statement extends Line {
         if(statement.endsWith("?"))
             return new IfStatement(chapter, statement, lineNumber, indent);
         if(statement.endsWith(":")) {
-            LabelStatement stmt = new LabelStatement(chapter, statement, lineNumber, indent);
+            LabelStatement stmt;
+            if(statement.startsWith(":")) {
+                stmt = new ProcedureLabelStatement(chapter, statement, lineNumber, indent);
+                chapter.stashProcedureLabel((ProcedureLabelStatement)stmt);
+            }
+            else
+                stmt= new LabelStatement(chapter, statement, lineNumber, indent);
             chapter.addLabel(stmt.getLabel(), stmt);
             return stmt;
         }
+        if(statement.equals(">>"))
+            return new ReturnStatement(chapter, lineNumber, indent);
         if(statement.startsWith(">"))
             return new GotoStatement(chapter, statement, lineNumber, indent);
         else

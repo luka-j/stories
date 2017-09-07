@@ -92,18 +92,18 @@ public class Parser {
                 if(time == null) {
                     return new Question(chapter, var, text, charName, lineNumber, indent);
                 } else {
-                    double multiplicator=1;
+                    double coeff=1;
                     if(time.endsWith("ms")) {
-                        multiplicator = 1./1000;
+                        coeff = 1./1000;
                         time = time.substring(0, time.length()-2);
                     } else if(time.endsWith("s")) {
-                        multiplicator = 1;
+                        coeff = 1;
                         time = time.substring(0, time.length()-1);
                     } else if(time.endsWith("m")) {
-                        multiplicator = 60;
+                        coeff = 60;
                         time = time.substring(0, time.length()-1);
                     }
-                    double seconds = Double.parseDouble(time) * multiplicator;
+                    double seconds = Double.parseDouble(time) * coeff;
                     return new TimedQuestion(chapter, var, text, charName, seconds, lineNumber, indent);
                 }
             }
@@ -137,6 +137,12 @@ public class Parser {
                     throws InterpretationException {
                 return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line));
             }
+        },
+        END_CHAPTER {
+            @Override
+            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams) throws InterpretationException {
+                return new EndChapter(chapter, lineNumber, indent);
+            }
         };
 
         /**
@@ -159,10 +165,12 @@ public class Parser {
             if(!escaped && line.isEmpty()) return COMMENT;
             if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
                 return COMMENT;
-            if(!escaped && line.startsWith(":::"))
+            if(!escaped && line.equals(":::"))
                 return STATEMENT_BLOCK_MARKER;
             if(!escaped && (insideStatementBlock || line.startsWith(":")))
                 return STATEMENT;
+            if(!escaped && line.equals(";;"))
+                return END_CHAPTER;
             if(!escaped && line.startsWith("?"))
                 return QUESTION;
             if(!escaped && line.startsWith("*"))
@@ -238,6 +246,9 @@ public class Parser {
         LineType type;
         if(insideStatementBlock && indent <= statementBlockIndent)
             insideStatementBlock = false;
+
+        int commIndex = line.indexOf("//");
+        if(commIndex > 0) line = stripComments(line);
         type = getType(line, chapter.getState(), escaped, insideStatementBlock);
 
         if(type == COMMENT) return;
@@ -247,8 +258,6 @@ public class Parser {
             return;
         }
 
-        int commIndex = line.indexOf("//");
-        if(commIndex >= 0) line = stripComments(line);
         Line current;
         if(type == ANSWER) {
             current = type.parse(line, lineNumber, indent, chapter, previousQuestion);

@@ -22,7 +22,9 @@ import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.DisplayProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Parser;
+import rs.lukaj.stories.parser.types.LabelStatement;
 import rs.lukaj.stories.parser.types.Line;
+import rs.lukaj.stories.parser.types.ProcedureLabelStatement;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +40,7 @@ public class Chapter {
     private DisplayProvider display; //t'is too
     private File source;
 
-    private Map<String, Line> labels = new HashMap<>();
+    private Map<String, LabelStatement> labels = new HashMap<>();
 
     public Chapter(String name, Book book, State initialState, DisplayProvider display, File source) throws FileNotFoundException {
         if(!source.isFile()) throw new FileNotFoundException("Source doesn't exist: " + source.getAbsolutePath());
@@ -75,10 +77,17 @@ public class Chapter {
         return book.imageExists(filePath);
     }
 
-    public void addLabel(String label, Line line) {
+    private ProcedureLabelStatement previousPLS;
+    public void stashProcedureLabel(ProcedureLabelStatement label) {
+        previousPLS = label;
+    }
+    public ProcedureLabelStatement getPreviousProcedureLabel() {
+        return previousPLS;
+    }
+    public void addLabel(String label, LabelStatement line) {
         labels.put(label, line);
     }
-    public Line getLabel(String label) {
+    public LabelStatement getLabel(String label) {
         return labels.get(label);
     }
 }
