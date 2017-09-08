@@ -35,6 +35,11 @@ public class LinuxDebugFiles implements FileProvider {
     }
 
     @Override
+    public File getSourceFile(String rootPath, String filePath) {
+        return new File(getSourceDirectory(rootPath), filePath);
+    }
+
+    @Override
     public File getRootDirectory(String path) {
         return getSourceDirectory(path);
     }

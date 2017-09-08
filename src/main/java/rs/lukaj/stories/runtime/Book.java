@@ -211,6 +211,9 @@ public class Book {
         return new File(files.getRootDirectory(name), METADATA_FILENAME);
     }
 
+    protected FileProvider getFiles() {
+        return files;
+    }
     //not sure whether even putting Runtime reference in Book is a good idea
     /*public Runtime getRuntime() {
         return runtime;

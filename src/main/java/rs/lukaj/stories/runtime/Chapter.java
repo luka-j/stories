@@ -22,6 +22,7 @@ import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.DisplayProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Parser;
+import rs.lukaj.stories.parser.Preprocessor;
 import rs.lukaj.stories.parser.types.LabelStatement;
 import rs.lukaj.stories.parser.types.Line;
 import rs.lukaj.stories.parser.types.ProcedureLabelStatement;
@@ -53,9 +54,11 @@ public class Chapter {
 
     public Line compile() throws IOException, InterpretationException {
         List<String> lines = Utils.readAllLines(source);
-        if(lines.isEmpty()) throw new InterpretationException("File is empty!");
+        //if(lines.isEmpty()) throw new InterpretationException("File is empty!");
 
         Parser parser = new Parser(this);
+        Preprocessor pp = new Preprocessor(lines);
+        lines = pp.process(book.getFiles(), book.getName());
         return parser.parse(lines);
     }
 
