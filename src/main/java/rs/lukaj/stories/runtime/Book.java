@@ -210,4 +210,9 @@ public class Book {
     public File getInfoFile() {
         return new File(files.getRootDirectory(name), METADATA_FILENAME);
     }
+
+    //not sure whether even putting Runtime reference in Book is a good idea
+    /*public Runtime getRuntime() {
+        return runtime;
+    }*/
 }

@@ -7,8 +7,6 @@ char1: That's nice, I like [food+ish] too
 :>fun
 Your result is [ordinal]
 
-;; //this is basically a halt
-
 ::fun:
    :string='25 //this is a actually a string with value of 25 (ignoring ')
    :ordinal=string+1

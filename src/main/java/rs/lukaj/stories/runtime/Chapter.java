@@ -76,6 +76,10 @@ public class Chapter {
     public boolean imageExists(String filePath) {
         return book.imageExists(filePath);
     }
+    public Book getBook() {
+        return book;
+    }
+
 
     private ProcedureLabelStatement previousPLS;
     public void stashProcedureLabel(ProcedureLabelStatement label) {

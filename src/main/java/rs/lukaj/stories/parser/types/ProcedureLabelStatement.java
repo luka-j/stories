@@ -27,4 +27,16 @@ public class ProcedureLabelStatement extends LabelStatement {
     protected ProcedureLabelStatement(Chapter chapter, String statement, int lineNumber, int indent) throws InterpretationException {
         super(chapter, statement.substring(1), lineNumber, indent);
     }
+
+    @Override
+    public Line execute() {
+        if(jumpedFrom != null) return nextLine; //we got here by goto
+        else {
+            Line next = nextLine;
+            while(next != null && !(next instanceof ReturnStatement)) next = next.nextLine;
+
+            if(next == null) return null;
+            else return next.nextLine;
+        }
+    }
 }

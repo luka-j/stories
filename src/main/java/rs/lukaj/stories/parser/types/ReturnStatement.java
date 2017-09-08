@@ -32,6 +32,8 @@ public class ReturnStatement extends Statement {
 
     @Override
     public Line execute() {
-        return beginning.jumpedFrom.nextLine;
+        Line next = beginning.jumpedFrom.nextLine;
+        beginning.jumpedFrom = null; //we're done with this function, reseting return value
+        return next;
     }
 }

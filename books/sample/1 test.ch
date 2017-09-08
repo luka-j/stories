@@ -24,3 +24,6 @@ character : Well hello there
   char2: nuh-uh
   :ansYou? //this is equivalent to q=ansYou
     :>question //aand the famous goto
+
+;; //this is a halt
+Hey, wait for me! (they won't, they're already long gone)

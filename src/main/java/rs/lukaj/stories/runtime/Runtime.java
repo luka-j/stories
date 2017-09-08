@@ -109,7 +109,6 @@ public class Runtime {
         return book;
     }
 
-
     /**
      * This provides a way of executing the whole book in a tight loop (i.e. it advances
      * statements and chapters until it reaches the end). It obviously takes a while

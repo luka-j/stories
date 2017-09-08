@@ -59,7 +59,7 @@ public class Question extends Line {
             chosenIndex = displayPictureQuestion();
         else
             chosenIndex = displayQuestion();
-        if(chosenIndex >= 0)
+        if(chosenIndex >= 0 && chosenIndex < answers.size())
             chosen = answers.get(chosenIndex).getVariable();
         try {
             if(chosen != null)

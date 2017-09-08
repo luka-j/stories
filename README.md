@@ -312,11 +312,14 @@ be able to handle all lengths.
 All other lines are treated as narratives and are displayed to the user
 as such.
 
+
 //todo whitespace rules inside statements (usually ignored)
 
 //todo escaping, variable substitution
 
 //todo statement blocks, conditional goto, nesting
+
+//halt, procedures, and god knows what else I've added in the meantime
 
 ## Interpretation rules
 
