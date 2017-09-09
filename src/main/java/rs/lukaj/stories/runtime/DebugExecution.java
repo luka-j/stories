@@ -23,9 +23,9 @@ import rs.lukaj.stories.environment.LinuxDebugFiles;
 import rs.lukaj.stories.exceptions.InterpretationException;
 
 public class DebugExecution {
-    public static void run() {
+    public static void run(String name) {
         Runtime runtime = new Runtime(new LinuxDebugFiles(), new BasicTerminalDisplay());
-        runtime.loadBook("sample");
+        runtime.loadBook(name);
         try {
             System.out.println("\n\nRUNNING BOOK\n\n");
             runtime.executeInTightLoop(true, true);

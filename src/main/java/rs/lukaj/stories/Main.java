@@ -25,6 +25,6 @@ import rs.lukaj.stories.runtime.DebugExecution;
  */
 public class Main {
     public static void main(String[] args) {
-        DebugExecution.run();
+        DebugExecution.run(args.length > 0 ? args[0] : "sample");
     }
 }

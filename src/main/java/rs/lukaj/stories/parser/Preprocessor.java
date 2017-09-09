@@ -62,6 +62,8 @@ public class Preprocessor {
                     String[] tokens = l.split("\\s+", 2);
                     if(tokens.length != 2) defines.clear();
                     else defines.remove(tokens[1]);
+                } else {
+                    result.add(line); //let's keep comments for now - without #define substitution
                 }
             }
         }
