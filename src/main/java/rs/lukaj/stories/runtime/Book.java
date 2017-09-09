@@ -53,11 +53,9 @@ public class Book {
     private List<String> chapterNames = new ArrayList<>();
     private State state;
     private File stateFile;
-    private Runtime runtime;
 
-    public Book(String name, Runtime runtime, FileProvider files, DisplayProvider display) {
+    public Book(String name, FileProvider files, DisplayProvider display) {
         this.name = name;
-        this.runtime = runtime;
         this.files = files;
         this.display = display;
         File sourceDir = files.getSourceDirectory(name);
@@ -214,8 +212,4 @@ public class Book {
     protected FileProvider getFiles() {
         return files;
     }
-    //not sure whether even putting Runtime reference in Book is a good idea
-    /*public Runtime getRuntime() {
-        return runtime;
-    }*/
 }

@@ -43,7 +43,7 @@ public class Runtime {
     }
 
     public Book loadBook(String name) throws LoadingException {
-        book = new Book(name, this, files, display);
+        book = new Book(name, files, display);
         return book;
     }
 

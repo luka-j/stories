@@ -195,11 +195,14 @@ Implementations are free to define their variables following the first
 paragraph of this section. Developers writing books are not expected to
 use variables starting and ending with an underscore.
 
-Only special variable present by default at this moment is the chapter
-counter, \_\_chapter\_\_. It is 1-based index of the current chapter and
-is  incremented on each chapter ending and fetched on each chapter
-beginning. If chapter counter is larger than chapter count, book is
-regarded as finished.
+Special variables present by default at this moment are the chapter
+counter, \_\_chapter\_\_ and line counter \_\_line\_\_. Chapter counter
+is 1-based index of the current chapter and is  incremented on each
+chapter ending and fetched on each chapter beginning. If chapter counter
+is larger than chapter count, book is regarded as finished. Line counter
+uses line count which is part of Line object to keep track of last
+executed line, and upon resume it loads first line whose line count is
+less or equal to the value of \_\_line\_\_.
 
 ## Syntax and statements
 
@@ -319,8 +322,9 @@ as such.
 
 //todo statement blocks, conditional goto, nesting
 
-//halt, procedures, and god knows what else I've added in the meantime
+//todo halt, procedures, and god knows what else I've added in the meantime
 
+//todo # directives
 ## Interpretation rules
 
 //todo
