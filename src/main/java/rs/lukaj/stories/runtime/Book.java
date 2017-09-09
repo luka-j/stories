@@ -137,6 +137,8 @@ public class Book {
         try {
             Chapter chapter = new Chapter(chapterName, this, state, display, source);
             Line begin = chapter.compile();
+            if(begin == null) return null;
+
             int initialNumber = begin.getLineNumber();
             int line = state.getOrDefault(CURRENT_LINE, 0).intValue();
             while(begin != null && begin.getLineNumber() < line) begin = begin.getNextLine();
