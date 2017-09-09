@@ -137,7 +137,7 @@ public class Book {
         try {
             Chapter chapter = new Chapter(chapterName, this, state, display, source);
             Line begin = chapter.compile();
-            if(begin == null) return null;
+            if(begin == null) return null; //todo this shouldn't really happen
 
             int initialNumber = begin.getLineNumber();
             int line = state.getOrDefault(CURRENT_LINE, 0).intValue();
@@ -189,12 +189,13 @@ public class Book {
 
     public void reloadBookInfo() {
         File infoFile = new File(files.getRootDirectory(name), METADATA_FILENAME);
-        if(infoFile.isFile()) {
-            try {
-                info = new State(infoFile);
-            } catch (IOException e) {
-                throw new LoadingException("Failed to load metadata", e);
-            }
+        try {
+            if(!infoFile.isFile())
+                if(!infoFile.createNewFile())
+                    throw new IOException("Cannot create new file at " + infoFile.getAbsolutePath());
+            info = new State(infoFile);
+        } catch (IOException e) {
+            throw new LoadingException("Failed to load metadata", e);
         }
     }
 
