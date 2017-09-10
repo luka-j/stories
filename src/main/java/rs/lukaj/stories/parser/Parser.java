@@ -77,13 +77,17 @@ public class Parser {
             @Override
             public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
                     throws InterpretationException {
+                if(!line.contains(":")) line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in quesitons
+
                 String[] parts = line.substring(1).split("\\s*:\\s*", 2);
-                if(parts.length < 2)
-                    throw new InterpretationException("Invalid question syntax; missing :");
                 String text = parts[1];
                 String var = Utils.between(parts[0], '[', ']');
                 String time = Utils.between(parts[0], '(', ')');
-                String charName = Utils.between(line, ']', ':');
+                String charName;
+                if(parts[0].indexOf("]") > parts[0].indexOf(")"))
+                    charName = Utils.between(line, ']', ':');
+                else
+                    charName = Utils.between(line, ')', ':');
                 if(time != null) time = time.trim();
                 if(var == null) throw new InterpretationException("Variable name for question is empty");
                 charName = charName.trim(); //this shouldn't be null (both ] and : must exist, otherwise NPE would be thrown earlier)
