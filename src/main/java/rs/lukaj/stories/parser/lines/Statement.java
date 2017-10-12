@@ -16,9 +16,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
 
 /**
@@ -52,4 +54,17 @@ public abstract class Statement extends Line {
         else
             return new AssignStatement(chapter, statement, lineNumber, indent);
     }
+
+    @Override
+    public String generateCode(int indent) {
+        StringBuilder stmt = generateStatement();
+        if(this instanceof IfStatement) stmt.append('?');
+        if(this instanceof LabelStatement) stmt.append(':');
+        if(this instanceof ProcedureLabelStatement) stmt.insert(0, ':');
+        if(this instanceof ReturnStatement) stmt.replace(0, stmt.length(), ">>");
+        if(this instanceof GotoStatement) stmt.insert(0, '>');
+        return Utils.generateIndent(indent) + LineType.STATEMENT.makeLine(stmt.toString());
+    }
+
+    protected abstract StringBuilder generateStatement();
 }

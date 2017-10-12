@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Expressions;
@@ -46,6 +46,14 @@ public class GotoStatement extends Statement {
             jumpTo = target;
     }
 
+    public GotoStatement(Chapter chapter, int lineNumber, int indent, String targetLabel) {
+        super(chapter, lineNumber, indent);
+        this.targetLabel = targetLabel;
+        LabelStatement target = chapter.getLabel(targetLabel);
+        if(target != null)
+            jumpTo = target;
+    }
+
     @Override
     public Line execute() {
         if(condition == null || Type.isTruthy(condition.eval())) {
@@ -63,5 +71,15 @@ public class GotoStatement extends Statement {
     public void setJump(Chapter chapter) throws InterpretationException {
         jumpTo = chapter.getLabel(targetLabel);
         if(jumpTo == null) throw new InterpretationException("Invalid label for goto");
+    }
+
+    @Override
+    protected StringBuilder generateStatement() {
+        StringBuilder sb = new StringBuilder(targetLabel);
+        if(condition != null) {
+            sb.insert(0, "? ");
+            sb.insert(0, condition.literal);
+        }
+        return sb;
     }
 }

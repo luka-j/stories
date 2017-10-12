@@ -185,6 +185,16 @@ public class State implements VariableProvider {
         variables.put(name, new Value<>(Type.NULL, null));
     }
 
+    /**
+     * Removes a variable with this name from the state. If such variable doesn't
+     * exist, this method does nothing.
+     * @param name variable's name
+     */
+    public void undeclareVariable(String name) {
+        if(name == null) return;
+        variables.remove(name);
+    }
+
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);

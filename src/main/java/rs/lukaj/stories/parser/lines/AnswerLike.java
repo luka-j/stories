@@ -16,11 +16,12 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.runtime.State;
 
 public interface AnswerLike<T> {
     String getVariable();
     T getContent(State state);
+    String generateCode(int indent);
 }

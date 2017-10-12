@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
@@ -79,6 +79,12 @@ public class AssignStatement extends Statement {
 
     }
 
+    public AssignStatement(Chapter chapter, int lineNumber, int indent, String variable, String expression) throws InterpretationException {
+        super(chapter, lineNumber, indent);
+        this.variable.add(variable);
+        this.expression.add(new Expressions(expression, chapter.getState()));
+    }
+
     @Override
     public Line execute() {
         State state = chapter.getState();
@@ -99,6 +105,21 @@ public class AssignStatement extends Statement {
         }
         return nextLine;
     }
+
+    @Override
+    protected StringBuilder generateStatement() {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<variable.size(); i++) {
+            sb.append(variable.get(i)).append(" = ").append(expression.get(i).literal).append(',');
+        }
+        sb.deleteCharAt(sb.length()-1);
+        return sb;
+    }
+
+//    @Override
+//    public String generateCode(int indent) {
+//        String code = super.generateCode(indent);
+//    }
 
 
 }

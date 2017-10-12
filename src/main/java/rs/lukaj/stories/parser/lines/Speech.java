@@ -16,28 +16,41 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
+import rs.lukaj.stories.runtime.State;
 
-public class LabelStatement extends Statement {
-    private String label;
+/**
+ * Created by luka on 3.6.17..
+ */
+public class Speech extends Line {
+    public static final LineType LINE_TYPE = LineType.SPEECH;
 
-    protected LabelStatement(Chapter chapter, String statement, int lineNumber, int indent)
+    protected String character;
+    protected String text;
+
+    public Speech(Chapter chapter, String character, String text, int lineNumber, int indent)
             throws InterpretationException {
         super(chapter, lineNumber, indent);
-        if(statement.contains("?") || statement.contains(">"))
-            throw new InterpretationException("Label shouldn't contain ? or >");
-        label = statement.substring(0, statement.length()-1);
+        State.checkName(character);
+        this.text = text;
+        this.character = character;
     }
 
     @Override
     public Line execute() {
-        return nextLine; //it essentialy does nothing
+        text = Expressions.substituteVariables(text, chapter.getState());
+        chapter.getDisplay().showSpeech(character, getAvatar(character), text);
+        return nextLine;
     }
 
-    public String getLabel() {
-        return label;
+    @Override
+    public String generateCode(int indent) {
+        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(character, text);
     }
 }

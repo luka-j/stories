@@ -11,8 +11,8 @@ character : Well hello there
 ::: //three colons denote the start of a statement block: everything following with larger indent,
     //except comments, is treated as a statement
     res=sqrt(10)+3
-    5<res?
-      \You can do math, congrats! //backslash, however, always has precedence!
+    5<res? //this is an if statement, following similar indent rules
+      \You can do math, congrats! //backslash always has precedence!
 
 :question: //this is a label
 ?[q]character: Who's the best //a question, whose answer is stored in variable q

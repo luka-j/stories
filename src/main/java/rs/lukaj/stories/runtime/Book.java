@@ -24,7 +24,7 @@ import rs.lukaj.stories.environment.FileProvider;
 import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.exceptions.LoadingException;
-import rs.lukaj.stories.parser.types.Line;
+import rs.lukaj.stories.parser.lines.Line;
 
 import java.io.File;
 import java.io.FileNotFoundException;

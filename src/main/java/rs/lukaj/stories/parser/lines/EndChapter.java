@@ -16,24 +16,26 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
-import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.Utils;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
 
-public class ReturnStatement extends Statement {
-    private ProcedureLabelStatement beginning;
+public class EndChapter extends Line {
+    public static final LineType LINE_TYPE = LineType.END_CHAPTER;
 
-    protected ReturnStatement(Chapter chapter, int lineNumber, int indent) throws InterpretationException {
+    public EndChapter(Chapter chapter, int lineNumber, int indent) {
         super(chapter, lineNumber, indent);
-        beginning = chapter.getPreviousProcedureLabel();
-        if(beginning == null) throw new InterpretationException("Return without ProcedureLabel");
     }
 
     @Override
     public Line execute() {
-        Line next = beginning.jumpedFrom.nextLine;
-        beginning.jumpedFrom = null; //we're done with this function, reseting return value
-        return next;
+        return null; //returning null signals end of the chapter
+    }
+
+    @Override
+    public String generateCode(int indent) {
+        return Utils.generateIndent(indent) + LINE_TYPE.makeLine();
     }
 }

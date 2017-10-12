@@ -16,25 +16,28 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
 import rs.lukaj.stories.runtime.State;
 
 /**
- * Created by luka on 4.6.17..
+ * Created by luka on 3.6.17..
  */
-public class TextInput extends Line {
-    protected String variable;
-    protected String hint;
+public class Answer implements AnswerLike<String> {
+    public static final LineType LINE_TYPE = LineType.ANSWER;
 
-    public TextInput(Chapter chapter, String variable, String hint, int lineNumber,
-                     int indent) throws InterpretationException {
-        super(chapter, lineNumber, indent);
-        State.checkName(variable);
+    protected String variable;
+    protected String text;
+
+    public Answer(Chapter chapter, String variable, String text) throws InterpretationException {
+        chapter.getState().declareVariable(variable);
         this.variable = variable;
-        this.hint = hint;
+        this.text = text;
     }
 
     public String getVariable() {
@@ -42,13 +45,16 @@ public class TextInput extends Line {
     }
 
     @Override
-    public Line execute() {
-        String input = chapter.getDisplay().showInput(hint);
-        try {
-            chapter.getState().setVariable(variable, input);
-        } catch (InterpretationException e) {
-            throw new RuntimeException("Uncaught InterpretationException in TextInput#execute", e);
-        }
-        return nextLine;
+    public String getContent(State state) {
+        return getText(state);
+    }
+
+    @Override
+    public String generateCode(int indent) {
+        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, text);
+    }
+
+    public String getText(State state) {
+        return Expressions.substituteVariables(text, state);
     }
 }

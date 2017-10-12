@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
@@ -34,6 +34,7 @@ public abstract class Line {
     private final int lineNumber;
 
     public abstract Line execute();
+    public abstract String generateCode(int indent);
 
     public int getIndent() {
         return indent;

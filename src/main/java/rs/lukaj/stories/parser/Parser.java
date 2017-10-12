@@ -20,172 +20,20 @@ package rs.lukaj.stories.parser;
 
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
-import rs.lukaj.stories.parser.types.*;
+import rs.lukaj.stories.parser.lines.GotoStatement;
+import rs.lukaj.stories.parser.lines.IfStatement;
+import rs.lukaj.stories.parser.lines.Line;
+import rs.lukaj.stories.parser.lines.Question;
 import rs.lukaj.stories.runtime.Chapter;
-import rs.lukaj.stories.runtime.State;
 
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
 import static rs.lukaj.stories.Utils.Pair;
-import static rs.lukaj.stories.parser.Parser.LineType.*;
+import static rs.lukaj.stories.parser.LineType.*;
 
 public class Parser {
-
-    public enum LineType {
-        ANSWER {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                Question question = (Question)additionalParams[0];
-                if(question == null) throw new InterpretationException("Creating answer without the question");
-                String[] tokens = line.substring(2).split("\\s*]\\s*", 2);
-                if(tokens.length < 2)
-                    throw new InterpretationException("No variable for answer");
-                if(chapter.imageExists(tokens[1])) {
-                    PictureAnswer ans = new PictureAnswer(tokens[0], chapter.getImage(tokens[1]));
-                    question.addPictureAnswer(ans);
-                } else {
-                    Answer ans = new Answer(chapter, tokens[0], tokens[1]);
-                    question.addAnswer(ans);
-                }
-                //we're being quite strict here: disallowing mixing of image and String, even if
-                //String only looks like an image. An alternative would be falling back to
-                //String in case Question detects mixing, though I'm afraid that'd make things
-                //quite complicated and unpredictable todo reconsider
-                return question;
-            }
-        },
-        STATEMENT {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                if(line.startsWith(":")) line = line.substring(1);
-                //^ it doesn't have to start with : - e.g. in statement blocks
-                return Statement.create(chapter, line, lineNumber, indent);
-            }
-        },
-        NARRATIVE {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                return new Narrative(chapter, line, lineNumber, indent);
-            }
-        },
-        QUESTION {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                if(!line.contains(":")) line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in quesitons
-
-                String[] parts = line.substring(1).split("\\s*:\\s*", 2);
-                String text = parts[1];
-                String var = Utils.between(parts[0], '[', ']');
-                String time = Utils.between(parts[0], '(', ')');
-                String charName;
-                if(parts[0].indexOf("]") > parts[0].indexOf(")"))
-                    charName = Utils.between(line, ']', ':');
-                else
-                    charName = Utils.between(line, ')', ':');
-                if(time != null) time = time.trim();
-                if(var == null) throw new InterpretationException("Variable name for question is empty");
-                charName = charName.trim(); //this shouldn't be null (both ] and : must exist, otherwise NPE would be thrown earlier)
-                var = var.trim();
-
-                if(time == null) {
-                    return new Question(chapter, var, text, charName, lineNumber, indent);
-                } else {
-                    double coeff=1;
-                    if(time.endsWith("ms")) {
-                        coeff = 1./1000;
-                        time = time.substring(0, time.length()-2);
-                    } else if(time.endsWith("s")) {
-                        coeff = 1;
-                        time = time.substring(0, time.length()-1);
-                    } else if(time.endsWith("m")) {
-                        coeff = 60;
-                        time = time.substring(0, time.length()-1);
-                    }
-                    double seconds = Double.parseDouble(time) * coeff;
-                    return new TimedQuestion(chapter, var, text, charName, seconds, lineNumber, indent);
-                }
-            }
-        },
-        SPEECH {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                String[] parts = line.split("\\s*:\\s*", 2);
-                return new Speech(chapter, parts[0], parts[1], lineNumber, indent);
-            }
-        },
-        INPUT {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                String[] parts = line.split("\\s*]\\s*", 2);
-                return new TextInput(chapter, parts[0].substring(1), parts[1], lineNumber, indent);
-            }
-        },
-        COMMENT {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                return new Nop(chapter, lineNumber, indent); //this is a no-op
-            }
-        },
-        STATEMENT_BLOCK_MARKER {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                    throws InterpretationException {
-                return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line));
-            }
-        },
-        END_CHAPTER {
-            @Override
-            public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams) throws InterpretationException {
-                return new EndChapter(chapter, lineNumber, indent);
-            }
-        };
-
-        /**
-         * Parse given string to line. String should be trimmed, stripped of starting
-         * backslashes and comments.
-         * @param line properly formatted string
-         * @param lineNumber this line's number
-         * @param indent indentation of this line
-         * @param chapter chapter this line belongs to
-         * @param additionalParams any additional parameters this line might request
-         * @return parsed Line
-         * @throws InterpretationException in case any error during parsing occurs
-         */
-        public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
-                throws InterpretationException;
-
-
-        public static LineType getType(String line, State state, boolean escaped, boolean insideStatementBlock)
-                throws InterpretationException {
-            if(!escaped && line.isEmpty()) return COMMENT;
-            if(!escaped  && (line.startsWith("//") || line.startsWith("#")))
-                return COMMENT;
-            if(!escaped && line.equals(":::"))
-                return STATEMENT_BLOCK_MARKER;
-            if(!escaped && (insideStatementBlock || line.startsWith(":")))
-                return STATEMENT;
-            if(!escaped && line.equals(";;"))
-                return END_CHAPTER;
-            if(!escaped && line.startsWith("?"))
-                return QUESTION;
-            if(!escaped && line.startsWith("*"))
-                return ANSWER;
-            if(!escaped && line.startsWith("[") && line.contains("]"))
-                return INPUT;
-            if(line.contains(":") && state.hasVariable(line.split("\\s*:", 2)[0]))
-                return SPEECH;
-            return NARRATIVE;
-        }
-    }
 
     private Question previousQuestion;
     private Line previousLine;

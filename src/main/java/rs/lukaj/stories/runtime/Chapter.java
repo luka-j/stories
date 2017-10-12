@@ -23,9 +23,9 @@ import rs.lukaj.stories.environment.DisplayProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Parser;
 import rs.lukaj.stories.parser.Preprocessor;
-import rs.lukaj.stories.parser.types.LabelStatement;
-import rs.lukaj.stories.parser.types.Line;
-import rs.lukaj.stories.parser.types.ProcedureLabelStatement;
+import rs.lukaj.stories.parser.lines.LabelStatement;
+import rs.lukaj.stories.parser.lines.Line;
+import rs.lukaj.stories.parser.lines.ProcedureLabelStatement;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -53,9 +53,11 @@ public class Expressions {
     private String variable;
     private Expression expression;
     private State state;
+    public final String literal;
 
     public Expressions(String expression, State state) throws InterpretationException {
         this.state = state;
+        this.literal = expression;
         if(expression == null || expression.isEmpty()) {
             type = ExprType.BASIC;
             value = "";

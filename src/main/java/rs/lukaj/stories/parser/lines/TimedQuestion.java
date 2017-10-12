@@ -16,17 +16,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
-public class EndChapter extends Line {
-    public EndChapter(Chapter chapter, int lineNumber, int indent) {
-        super(chapter, lineNumber, indent);
-    }
-
-    @Override
-    public Line execute() {
-        return null; //returning null signals end of the chapter
+/**
+ * Created by luka on 4.6.17..
+ */
+public class TimedQuestion extends Question {
+    public TimedQuestion(Chapter chapter, String variable, String text, String character, double time,
+                         int lineNumber, int indent) throws InterpretationException {
+        super(chapter, variable, text, character, time, lineNumber, indent);
+        if(time <= 0) throw new InterpretationException("Time for question is negative or zero");
     }
 }

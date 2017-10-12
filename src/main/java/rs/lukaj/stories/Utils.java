@@ -56,6 +56,12 @@ public class Utils {
         return i;
     }
 
+    public static String generateIndent(int count) {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<count; i++) sb.append(' ');
+        return sb.toString();
+    }
+
     public static String between(String str, char begin, char end) {
         int b=0, e=0;
         while(b<str.length() && str.charAt(b) != begin) b++;

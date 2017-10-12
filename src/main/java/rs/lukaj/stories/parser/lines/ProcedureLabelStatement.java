@@ -16,26 +16,27 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
-import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
-/**
- * Created by luka on 3.6.17..
- */
-public class Narrative extends Line {
-    protected String text;
+public class ProcedureLabelStatement extends LabelStatement {
+    protected GotoStatement jumpedFrom = null;
 
-    public Narrative(Chapter chapter, String text, int lineNumber, int indent) {
-        super(chapter, lineNumber, indent);
-        this.text = text;
+    public ProcedureLabelStatement(Chapter chapter, String statement, int lineNumber, int indent) throws InterpretationException {
+        super(chapter, statement.substring(1), lineNumber, indent);
     }
 
     @Override
     public Line execute() {
-        text = Expressions.substituteVariables(text, chapter.getState());
-        chapter.getDisplay().showNarrative(text);
-        return nextLine;
+        if(jumpedFrom != null) return nextLine; //we got here by goto
+        else {
+            Line next = nextLine;
+            while(next != null && !(next instanceof ReturnStatement)) next = next.nextLine;
+
+            if(next == null) return null;
+            else return next.nextLine;
+        }
     }
 }

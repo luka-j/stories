@@ -16,36 +16,48 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
-import rs.lukaj.stories.parser.Expressions;
-import rs.lukaj.stories.runtime.Chapter;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.State;
 
-/**
- * Created by luka on 3.6.17..
- */
-public class Answer implements AnswerLike<String> {
-    protected String variable;
-    protected String text;
+import java.io.File;
 
-    public Answer(Chapter chapter, String variable, String text) throws InterpretationException {
-        chapter.getState().declareVariable(variable);
+/**
+ * Created by luka on 4.6.17..
+ */
+public class PictureAnswer implements AnswerLike<File> {
+    public static final LineType LINE_TYPE = LineType.ANSWER;
+
+    private String variable;
+    private File picture;
+
+    public PictureAnswer(String variable, File picture) throws InterpretationException {
+        State.checkName(variable);
         this.variable = variable;
-        this.text = text;
+        this.picture = picture;
+        if(!picture.isFile())
+            throw new IllegalArgumentException("Picture " + picture.getAbsolutePath() + " doesn't exist");
     }
 
+    public File getPicture() {
+        return picture;
+    }
+
+    @Override
     public String getVariable() {
         return variable;
     }
 
     @Override
-    public String getContent(State state) {
-        return getText(state);
+    public File getContent(State state) {
+        return getPicture();
     }
 
-    public String getText(State state) {
-        return Expressions.substituteVariables(text, state);
+    @Override
+    public String generateCode(int indent) {
+        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, picture.getName()); //todo this works only for a narrow set of cases
     }
 }

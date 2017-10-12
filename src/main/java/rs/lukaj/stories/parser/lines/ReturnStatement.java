@@ -16,27 +16,29 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
-public class ProcedureLabelStatement extends LabelStatement {
-    protected GotoStatement jumpedFrom = null;
+public class ReturnStatement extends Statement {
+    private ProcedureLabelStatement beginning;
 
-    protected ProcedureLabelStatement(Chapter chapter, String statement, int lineNumber, int indent) throws InterpretationException {
-        super(chapter, statement.substring(1), lineNumber, indent);
+    public ReturnStatement(Chapter chapter, int lineNumber, int indent) throws InterpretationException {
+        super(chapter, lineNumber, indent);
+        beginning = chapter.getPreviousProcedureLabel();
+        if(beginning == null) throw new InterpretationException("Return without ProcedureLabel");
+    }
+
+    @Override
+    protected StringBuilder generateStatement() {
+        return new StringBuilder();
     }
 
     @Override
     public Line execute() {
-        if(jumpedFrom != null) return nextLine; //we got here by goto
-        else {
-            Line next = nextLine;
-            while(next != null && !(next instanceof ReturnStatement)) next = next.nextLine;
-
-            if(next == null) return null;
-            else return next.nextLine;
-        }
+        Line next = beginning.jumpedFrom.nextLine;
+        beginning.jumpedFrom = null; //we're done with this function, reseting return value
+        return next;
     }
 }

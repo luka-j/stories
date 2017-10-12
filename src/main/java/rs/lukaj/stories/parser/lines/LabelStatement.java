@@ -16,40 +16,33 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
-import rs.lukaj.stories.parser.Expressions;
-import rs.lukaj.stories.parser.Type;
 import rs.lukaj.stories.runtime.Chapter;
 
-/**
- * Created by luka on 4.6.17..
- */
-public class IfStatement extends Statement {
-    private Line endIf;
-    private Expressions expression;
+public class LabelStatement extends Statement {
+    private String label;
 
-    protected IfStatement(Chapter chapter, String statement, int lineNumber, int indent)
+    public LabelStatement(Chapter chapter, String label, int lineNumber, int indent)
             throws InterpretationException {
         super(chapter, lineNumber, indent);
-        this.expression = new Expressions(statement.substring(0, statement.length()-1), chapter.getState());
-
+        if(label.contains("?") || label.contains(">"))
+            throw new InterpretationException("Label shouldn't contain ? or >");
+        this.label = label.substring(0, label.length()-1);
     }
 
     @Override
     public Line execute() {
-        if(Type.isTruthy(expression.eval()))
-            return nextLine;
-        else
-            return endIf;
+        return nextLine; //it essentialy does nothing
     }
 
-    public void setNextIfTrue(Line line) {
-        nextLine = line;
+    public String getLabel() {
+        return label;
     }
 
-    public void setNextIfFalse(Line line) {
-        endIf = line;
+    @Override
+    protected StringBuilder generateStatement() {
+        return new StringBuilder(label);
     }
 }

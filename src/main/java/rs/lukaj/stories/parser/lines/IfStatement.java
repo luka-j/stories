@@ -16,32 +16,49 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.parser.Type;
 import rs.lukaj.stories.runtime.Chapter;
-import rs.lukaj.stories.runtime.State;
 
 /**
- * Created by luka on 3.6.17..
+ * Created by luka on 4.6.17..
  */
-public class Speech extends Line {
-    protected String character;
-    protected String text;
+public class IfStatement extends Statement {
+    private Line endIf;
+    private Expressions expression;
 
-    public Speech(Chapter chapter, String character, String text, int lineNumber, int indent)
+    protected IfStatement(Chapter chapter, String statement, int lineNumber, int indent)
             throws InterpretationException {
         super(chapter, lineNumber, indent);
-        State.checkName(character);
-        this.text = text;
-        this.character = character;
+        this.expression = new Expressions(statement.substring(0, statement.length()-1), chapter.getState());
+    }
+
+    public IfStatement(Chapter chapter, int lineNumber, int indent, String expression) throws InterpretationException {
+        super(chapter, lineNumber, indent);
+        this.expression = new Expressions(expression, chapter.getState());
     }
 
     @Override
     public Line execute() {
-        text = Expressions.substituteVariables(text, chapter.getState());
-        chapter.getDisplay().showSpeech(character, getAvatar(character), text);
-        return nextLine;
+        if(Type.isTruthy(expression.eval()))
+            return nextLine;
+        else
+            return endIf;
+    }
+
+    public void setNextIfTrue(Line line) {
+        nextLine = line;
+    }
+
+    public void setNextIfFalse(Line line) {
+        endIf = line;
+    }
+
+    @Override
+    protected StringBuilder generateStatement() {
+        return new StringBuilder(expression.literal);
     }
 }

@@ -16,17 +16,35 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package rs.lukaj.stories.parser.types;
+package rs.lukaj.stories.parser.lines;
 
+import rs.lukaj.stories.Utils;
+import rs.lukaj.stories.parser.Expressions;
+import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
 
-public class Nop extends Line {
-    public Nop(Chapter chapter, int lineNumber, int indent) {
+/**
+ * Created by luka on 3.6.17..
+ */
+public class Narrative extends Line {
+    public static final LineType LINE_TYPE = LineType.NARRATIVE;
+
+    protected String text;
+
+    public Narrative(Chapter chapter, String text, int lineNumber, int indent) {
         super(chapter, lineNumber, indent);
+        this.text = text;
     }
 
     @Override
     public Line execute() {
+        text = Expressions.substituteVariables(text, chapter.getState());
+        chapter.getDisplay().showNarrative(text);
         return nextLine;
+    }
+
+    @Override
+    public String generateCode(int indent) {
+        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(text);
     }
 }
