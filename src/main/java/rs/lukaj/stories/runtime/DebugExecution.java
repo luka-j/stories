@@ -21,6 +21,10 @@ package rs.lukaj.stories.runtime;
 import rs.lukaj.stories.environment.BasicTerminalDisplay;
 import rs.lukaj.stories.environment.LinuxDebugFiles;
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.lines.Line;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DebugExecution {
     public static void run(String name) {
@@ -30,6 +34,24 @@ public class DebugExecution {
             System.out.println("\n\nRUNNING BOOK\n\n");
             runtime.executeInTightLoop(true, true);
             System.out.println("\n\nEND RUN\n\n");
+        } catch (InterpretationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testCodeGeneration(String bookName) {
+        Runtime runtime = new Runtime(new LinuxDebugFiles(), new BasicTerminalDisplay());
+        runtime.loadBook(bookName);
+        Book book = runtime.getCurrentlyExecutingBook();
+        try {
+            Line start = book.restart();
+            List<String> lines = new ArrayList<>();
+            while(start != null) {
+                lines.add(start.generateCode(start.getIndent()));
+                start = start.getNextLine();
+            }
+            for(String line : lines)
+                System.out.println(line);
         } catch (InterpretationException e) {
             e.printStackTrace();
         }

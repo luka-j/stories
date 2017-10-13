@@ -23,7 +23,6 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.lines.GotoStatement;
 import rs.lukaj.stories.parser.lines.IfStatement;
 import rs.lukaj.stories.parser.lines.Line;
-import rs.lukaj.stories.parser.lines.Question;
 import rs.lukaj.stories.runtime.Chapter;
 
 import java.util.Deque;
@@ -35,7 +34,6 @@ import static rs.lukaj.stories.parser.LineType.*;
 
 public class Parser {
 
-    private Question previousQuestion;
     private Line previousLine;
     private Line head;
     private boolean finished = false;
@@ -111,17 +109,11 @@ public class Parser {
         }
 
         Line current;
-        if(type == ANSWER) {
-            current = type.parse(line, lineNumber, indent, chapter, previousQuestion);
-        } else {
-            current = type.parse(line, lineNumber, indent, chapter);
-        }
+        current = type.parse(line, lineNumber, indent, chapter);
+
         if(head == null) head = current;
-        if(previousLine != null && previousLine != current) previousLine.setNextLine(current);
-        //previousLine == current iff current instanceof Question && type == ANSWER, because ANSWER isn't a Line
-        //todo improve parsing (move Question#nextLine setting to jumps)
+        if(previousLine != null) previousLine.setNextLine(current);
         previousLine = current;
-        if(current instanceof Question) previousQuestion = (Question) current;
     }
 
     public Line getHead() {

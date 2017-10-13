@@ -21,6 +21,7 @@ package rs.lukaj.stories.parser.lines;
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.LineType;
+import rs.lukaj.stories.runtime.Chapter;
 import rs.lukaj.stories.runtime.State;
 
 import java.io.File;
@@ -28,14 +29,16 @@ import java.io.File;
 /**
  * Created by luka on 4.6.17..
  */
-public class PictureAnswer implements AnswerLike<File> {
+public class PictureAnswer extends Line implements AnswerLike<File> {
     public static final LineType LINE_TYPE = LineType.ANSWER;
 
     private String variable;
     private File picture;
 
-    public PictureAnswer(String variable, File picture) throws InterpretationException {
-        State.checkName(variable);
+    public PictureAnswer(Chapter chapter, String variable, File picture, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
+        chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.picture = picture;
         if(!picture.isFile())
@@ -54,6 +57,11 @@ public class PictureAnswer implements AnswerLike<File> {
     @Override
     public File getContent(State state) {
         return getPicture();
+    }
+
+    @Override
+    public Line execute() {
+        return nextLine;
     }
 
     @Override

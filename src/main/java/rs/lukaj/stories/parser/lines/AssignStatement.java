@@ -110,7 +110,11 @@ public class AssignStatement extends Statement {
     protected StringBuilder generateStatement() {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<variable.size(); i++) {
-            sb.append(variable.get(i)).append(" = ").append(expression.get(i).literal).append(',');
+            sb.append(variable.get(i));
+            if(expression.get(i) != null)
+                sb.append(" = ").append(expression.get(i).literal);
+
+            sb.append(',');
         }
         sb.deleteCharAt(sb.length()-1);
         return sb;

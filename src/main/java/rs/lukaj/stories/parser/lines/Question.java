@@ -19,6 +19,7 @@
 package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.Utils;
+import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
@@ -37,7 +38,7 @@ public class Question extends Line {
     private String text;
     protected String character;
     private List<AnswerLike> answers = new ArrayList<>();
-    private boolean containsPictures;
+    private Boolean containsPictures;
     private double time;
 
     public Question(Chapter chapter, String variable, String text, String character,
@@ -57,6 +58,7 @@ public class Question extends Line {
 
     @Override
     public Line execute() {
+        Line retLine = getAnswers(); //don't modify nextLine - this can be executed multiple times (e.g. goto)
         String chosen = null;
         int chosenIndex;
         if(containsPictures)
@@ -72,6 +74,28 @@ public class Question extends Line {
                 chapter.getState().setVariable(answers.get(i).getVariable(), i == chosenIndex);
         } catch (InterpretationException ex) {
             throw new RuntimeException("Caught unhandled InterpretationException in Quesiton#execute!", ex);
+        }
+        return retLine;
+    }
+
+    private Line getAnswers() {
+        Line nextLine = this.nextLine;
+        containsPictures = null;
+        answers.clear();
+        while (nextLine.getIndent() > getIndent() && (nextLine instanceof AnswerLike || nextLine instanceof Statement)) {
+            if(nextLine instanceof Answer) {
+                if(containsPictures == Boolean.TRUE) //do NOT simplify (can/will be null)
+                    throw new ExecutionException("PictureAnswer when textual Answer expected!");
+                containsPictures = false;
+                answers.add((Answer)nextLine);
+            } else if(nextLine instanceof PictureAnswer) {
+                if(containsPictures == Boolean.FALSE)
+                    throw new ExecutionException("Textual Answer where PictureAnswer expected!");
+                containsPictures = true;
+                answers.add((PictureAnswer)nextLine);
+            }
+
+            nextLine = nextLine.execute();
         }
         return nextLine;
     }
@@ -91,17 +115,6 @@ public class Question extends Line {
         File[] answers = new File[this.answers.size()];
         for(int i = 0; i< this.answers.size(); i++) answers[i] = ((PictureAnswer) this.answers.get(i)).getPicture();
         return chapter.getDisplay().showPictureQuestion(text, character, getAvatar(character), time, answers);
-    }
-
-    public void addAnswer(Answer answer) throws InterpretationException {
-        if(!answers.isEmpty() && containsPictures) throw new InterpretationException("Wrong answer type, expected PictureAnswer");
-        answers.add(answer);
-    }
-
-    public void addPictureAnswer(PictureAnswer answer) throws InterpretationException {
-        if(answers.isEmpty()) containsPictures = true;
-        if(!containsPictures) throw new InterpretationException("Wrong answer type, expected textual Answer");
-        answers.add(answer);
     }
 
     public String getVariable() {

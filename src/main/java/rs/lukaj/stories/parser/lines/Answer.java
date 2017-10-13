@@ -28,13 +28,15 @@ import rs.lukaj.stories.runtime.State;
 /**
  * Created by luka on 3.6.17..
  */
-public class Answer implements AnswerLike<String> {
+public class Answer extends Line implements AnswerLike<String> {
     public static final LineType LINE_TYPE = LineType.ANSWER;
 
     protected String variable;
     protected String text;
 
-    public Answer(Chapter chapter, String variable, String text) throws InterpretationException {
+    public Answer(Chapter chapter, String variable, String text, int lineNumber, int indent)
+            throws InterpretationException {
+        super(chapter, lineNumber, indent);
         chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.text = text;
@@ -47,6 +49,11 @@ public class Answer implements AnswerLike<String> {
     @Override
     public String getContent(State state) {
         return getText(state);
+    }
+
+    @Override
+    public Line execute() {
+        return nextLine;
     }
 
     @Override

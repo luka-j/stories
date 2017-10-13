@@ -27,25 +27,22 @@ import rs.lukaj.stories.runtime.State;
 public enum LineType {
     ANSWER {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-            Question question = (Question)additionalParams[0];
-            if(question == null) throw new InterpretationException("Creating answer without the question");
-            String[] tokens = line.substring(2).split("\\s*]\\s*", 2);
+           String[] tokens = line.substring(2).split("\\s*]\\s*", 2);
             if(tokens.length < 2)
                 throw new InterpretationException("No variable for answer");
+            Line ans;
             if(chapter.imageExists(tokens[1])) {
-                PictureAnswer ans = new PictureAnswer(tokens[0], chapter.getImage(tokens[1]));
-                question.addPictureAnswer(ans);
+                ans = new PictureAnswer(chapter, tokens[0], chapter.getImage(tokens[1]), lineNumber, indent);
             } else {
-                Answer ans = new Answer(chapter, tokens[0], tokens[1]);
-                question.addAnswer(ans);
+                ans = new Answer(chapter, tokens[0], tokens[1], lineNumber, indent);
             }
             //we're being quite strict here: disallowing mixing of image and String, even if
             //String only looks like an image. An alternative would be falling back to
             //String in case Question detects mixing, though I'm afraid that'd make things
             //quite complicated and unpredictable todo reconsider
-            return question;
+            return ans;
         }
 
         @Override
@@ -68,7 +65,7 @@ public enum LineType {
     },
     STATEMENT {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             if(line.startsWith(":")) line = line.substring(1);
             //^ it doesn't have to start with : - e.g. in statement blocks
@@ -94,7 +91,7 @@ public enum LineType {
     },
     NARRATIVE {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             return new Narrative(chapter, line, lineNumber, indent);
         }
@@ -117,7 +114,7 @@ public enum LineType {
     },
     QUESTION {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             if(!line.contains(":")) line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in questions
 
@@ -171,15 +168,15 @@ public enum LineType {
         @Override
         public String makeLine(String... params) {
             if(params.length != 4) throw new IllegalArgumentException("Wrong params for QUESTION line");
-            if(params[1].equals("0"))
+            if(params[1].equals("0.0"))
                 return "?[" + params[0] + "] " + params[2] + ": " + params[3];
             else
-                return "?[" + params[0] + "] (" + params[1] + ") " + params[2] + ": " + params[3];
+                return "?[" + params[0] + "] (" + params[1] + "s) " + params[2] + ": " + params[3];
         }
     },
     SPEECH {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             String[] parts = line.split("\\s*:\\s*", 2);
             return new Speech(chapter, parts[0], parts[1], lineNumber, indent);
@@ -206,7 +203,7 @@ public enum LineType {
     },
     INPUT {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             String[] parts = line.split("\\s*]\\s*", 2);
             return new TextInput(chapter, parts[0].substring(1), parts[1], lineNumber, indent);
@@ -232,7 +229,7 @@ public enum LineType {
     },
     COMMENT {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
             return new Nop(chapter, lineNumber, indent); //this is a no-op
         }
@@ -256,9 +253,9 @@ public enum LineType {
     },
     STATEMENT_BLOCK_MARKER {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-            return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line));
+            return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line)); //this is awkward (also disables generation)
         }
 
         @Override
@@ -274,7 +271,7 @@ public enum LineType {
     },
     END_CHAPTER {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams) throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) throws InterpretationException {
             return new EndChapter(chapter, lineNumber, indent);
         }
 
@@ -297,11 +294,10 @@ public enum LineType {
      * @param lineNumber this line's number
      * @param indent indentation of this line
      * @param chapter chapter this line belongs to
-     * @param additionalParams any additional parameters this line might request
      * @return parsed Line
      * @throws InterpretationException in case any error during parsing occurs
      */
-    public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter, Object... additionalParams)
+    public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter)
             throws InterpretationException;
     public abstract boolean matches(String line, State state);
 
