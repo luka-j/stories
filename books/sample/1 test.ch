@@ -17,7 +17,10 @@ character : Well hello there
 :question: //this is a label
 ?[q]character: Who's the best //a question, whose answer is stored in variable q
   *[ansMe] me
-  *[ansYou] you
+  :3<5?
+    *[ansYou] you
+  :ansYou?
+    *[ansGTH] I'm not a number, I'm a free man!
 :q=ansMe?
   character: that's right
 :q!=ansMe?

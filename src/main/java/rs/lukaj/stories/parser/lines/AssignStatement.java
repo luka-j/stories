@@ -66,7 +66,8 @@ public class AssignStatement extends Statement {
             if (tokens.length > 2) //this is actually always false... for now
                 throw new InterpretationException("Malformed assign-statement");
             String varName = tokens[0].trim();
-            chapter.getState().declareVariable(varName);
+            if(!(tokens.length == 1 && varName.startsWith("!") && chapter.getState().hasVariable(varName.substring(1))))
+                chapter.getState().declareVariable(varName);
             variable.add(varName);
             if (tokens.length > 1)
                 expression.add(new Expressions(tokens[1].trim(), chapter.getState()));
@@ -81,6 +82,8 @@ public class AssignStatement extends Statement {
 
     public AssignStatement(Chapter chapter, int lineNumber, int indent, String variable, String expression) throws InterpretationException {
         super(chapter, lineNumber, indent);
+        if(!(variable.startsWith("!") && chapter.getState().hasVariable(variable.substring(1))))
+            chapter.getState().declareVariable(variable);
         this.variable.add(variable);
         this.expression.add(new Expressions(expression, chapter.getState()));
     }
@@ -91,6 +94,9 @@ public class AssignStatement extends Statement {
         for(int i=0; i<variable.size(); i++) {
             String variable = this.variable.get(i);
             Expressions expression = this.expression.get(i);
+            if(variable.startsWith("!")) {
+                state.undeclareVariable(variable.substring(1));
+            }
             if(expression == null) continue;
 
             try {
@@ -119,11 +125,4 @@ public class AssignStatement extends Statement {
         sb.deleteCharAt(sb.length()-1);
         return sb;
     }
-
-//    @Override
-//    public String generateCode(int indent) {
-//        String code = super.generateCode(indent);
-//    }
-
-
 }

@@ -1,7 +1,7 @@
 #include include.ch
 #define is was
 
-That is other chapter
+That is the other chapter
 
 :char1
 char1: Tell me something, what's your favourite food?
