@@ -325,6 +325,8 @@ as such.
 //todo halt, procedures, and god knows what else I've added in the meantime
 
 //todo # directives
+
+//todo conditional answers, undeclaring variables
 ## Interpretation rules
 
 //todo

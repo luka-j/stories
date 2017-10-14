@@ -157,6 +157,20 @@ public class Book {
         }
     }
 
+    /**
+     * Get reference to the specific chapter. To obtain first line of the chapter, call {@link Chapter#compile()}.
+     * @param chapterNo chapter index, 1-based
+     * @return reference to the Chapter, unparsed
+     */
+    public Chapter getChapter(int chapterNo) {
+        chapterNo--;
+        try {
+            return new Chapter(chapterNames.get(chapterNo), this, state, display, chapters.get(chapterNo));
+        } catch (FileNotFoundException e) {
+            throw new LoadingException("Unexpected: cannot find source", e);
+        }
+    }
+
     private String getChapterName(String filename) {
         int start = filename.indexOf(' ');
         int end = filename.lastIndexOf('.');
