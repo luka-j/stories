@@ -57,8 +57,17 @@ public class IfStatement extends Statement {
         endIf = line;
     }
 
+    /**
+     * Used for generating the statement - generates the expression part of this statement, stripped of
+     * all the extra symbols such as : (at the beginning) and ? (at the end)
+     * @return the expression this if statement tests for
+     */
     @Override
-    protected StringBuilder generateStatement() {
+    public StringBuilder generateStatement() {
         return new StringBuilder(expression.literal);
+    }
+
+    public Expressions getExpression() {
+        return expression;
     }
 }

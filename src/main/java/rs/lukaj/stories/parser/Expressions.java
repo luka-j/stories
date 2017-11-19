@@ -43,7 +43,7 @@ public class Expressions {
         nonStringOps.add('|');
         nonStringOps.add('(');
         nonStringOps.add(')');
-    } //todo how do we actually concat strings which contain these?
+    } //todo how do we actually concat string literals which contain these?
 
     private enum ExprType {
         BASIC, STRING, NUMERIC
