@@ -86,7 +86,7 @@ public class Parser {
      * @throws InterpretationException
      */
     //this is one mess of a method honestly
-    public void parse(String line, int lineNumber) throws InterpretationException {
+    public Line parse(String line, int lineNumber) throws InterpretationException {
         boolean escaped = false;
         int indent = Utils.countLeadingSpaces(line);
         line = line.trim(); // all lines are trimmed at the beginning, and indent is stored separately !!
@@ -101,11 +101,11 @@ public class Parser {
         if(commIndex > 0) line = stripComments(line);
         type = getType(line, chapter.getState(), escaped, insideStatementBlock);
 
-        if(type == COMMENT) return;
+        if(type == COMMENT) return COMMENT.parse(line, lineNumber, indent, chapter);
         if(type == STATEMENT_BLOCK_MARKER) {
             insideStatementBlock = true;
             statementBlockIndent = indent;
-            return;
+            return STATEMENT_BLOCK_MARKER.parse(line, lineNumber, indent, chapter);
         }
 
         Line current;
@@ -114,6 +114,7 @@ public class Parser {
         if(head == null) head = current;
         if(previousLine != null) previousLine.setNextLine(current);
         previousLine = current;
+        return current;
     }
 
     public Line getHead() {

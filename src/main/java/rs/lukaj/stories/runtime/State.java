@@ -44,6 +44,9 @@ import static rs.lukaj.stories.parser.Type.P.NUMERIC;
  */
 public class State implements VariableProvider {
 
+    public static final String TRUE = "True";
+    public static final String FALSE = "False";
+
     @SuppressWarnings("unchecked") //we do sorcery here
     private static class Value<T> {
 
@@ -136,8 +139,8 @@ public class State implements VariableProvider {
     private Map<String, Value> variables = new HashMap<>();
 
     private void setPredefinedConstants() {
-        variables.put("True", new Value<>(CONSTANT_DOUBLE, 1.));
-        variables.put("False", new Value<>(CONSTANT_DOUBLE, 0.));
+        variables.put(TRUE, new Value<>(CONSTANT_DOUBLE, 1.));
+        variables.put(FALSE, new Value<>(CONSTANT_DOUBLE, 0.));
     }
 
     /**
