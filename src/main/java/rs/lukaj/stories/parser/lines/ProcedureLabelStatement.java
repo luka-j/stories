@@ -21,6 +21,7 @@ package rs.lukaj.stories.parser.lines;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
+//this doesn't really work (as a sane person would expect; otherwise it's fine)
 public class ProcedureLabelStatement extends LabelStatement {
     protected GotoStatement jumpedFrom = null;
 

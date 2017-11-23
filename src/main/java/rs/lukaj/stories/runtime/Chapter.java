@@ -37,7 +37,7 @@ import java.util.Map;
 public class Chapter {
     private Book book;
     private String name;
-    private State state; //'tis should be moved to book
+    private State state; //tis should be moved to book
     private DisplayProvider display; //t'is too
     private File source;
 
@@ -67,6 +67,9 @@ public class Chapter {
     }
     public String getName() {
         return name;
+    }
+    public File getSourceFile() {
+        return source;
     }
 
     public DisplayProvider getDisplay() {
