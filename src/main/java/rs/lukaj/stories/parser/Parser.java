@@ -23,6 +23,7 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.lines.GotoStatement;
 import rs.lukaj.stories.parser.lines.IfStatement;
 import rs.lukaj.stories.parser.lines.Line;
+import rs.lukaj.stories.parser.lines.Nop;
 import rs.lukaj.stories.runtime.Chapter;
 
 import java.util.Deque;
@@ -46,6 +47,7 @@ public class Parser {
     }
 
     public Line parse(List<String> lines) throws InterpretationException {
+        if(lines.isEmpty()) return new Nop(chapter, 0, 0);
         try {
             int lineNumber = 0;
             for (String line : lines) parse(line, lineNumber++);
