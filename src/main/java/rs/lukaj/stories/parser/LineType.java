@@ -29,14 +29,14 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-           String[] tokens = line.substring(2).split("\\s*]\\s*", 2);
-            if(tokens.length < 2)
+           String[] tokens = line.split("\\s*(]|\\[)\\s*", 3);
+            if(tokens.length < 3)
                 throw new InterpretationException("No variable for answer");
             Line ans;
             if(chapter.imageExists(tokens[1])) {
-                ans = new PictureAnswer(chapter, tokens[0], chapter.getImage(tokens[1]), lineNumber, indent);
+                ans = new PictureAnswer(chapter, tokens[1], chapter.getImage(tokens[2]), lineNumber, indent);
             } else {
-                ans = new Answer(chapter, tokens[0], tokens[1], lineNumber, indent);
+                ans = new Answer(chapter, tokens[1], tokens[2], lineNumber, indent);
             }
             //we're being quite strict here: disallowing mixing of image and String, even if
             //String only looks like an image. An alternative would be falling back to
