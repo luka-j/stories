@@ -60,10 +60,10 @@ public class Preprocessor {
                     defines.put(tokens[1], tokens[2]);
                 } else if(l.startsWith(UNDEFINE)) {
                     String[] tokens = l.split("\\s+", 2);
-                    if(tokens.length != 2) defines.clear();
+                    if(tokens.length < 2) defines.clear();
                     else defines.remove(tokens[1]);
                 } else {
-                    result.add(line); //let's keep comments for now - without #define substitution
+                    result.add(line); //let's keep directives for now - without #define substitution
                 }
             }
         }

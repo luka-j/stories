@@ -31,6 +31,7 @@ public class EndChapter extends Line {
 
     @Override
     public Line execute() {
+        chapter.getDisplay().signalEndChapter();
         return null; //returning null signals end of the chapter
     }
 

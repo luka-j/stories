@@ -71,4 +71,11 @@ public interface DisplayProvider {
     void onBookBegin(String bookName);
 
     void onBookEnd(String bookName);
+
+    /**
+     * Signals to the display the chapter is about to end using a halt instruction (;;).
+     * In most cases, it shouldn't be handled. After this call, onChapterEnd(int,String)
+     * will be called.
+     */
+    default void signalEndChapter() {}
 }

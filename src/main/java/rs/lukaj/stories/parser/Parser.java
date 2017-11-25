@@ -46,6 +46,13 @@ public class Parser {
         this.chapter = chapter;
     }
 
+    /**
+     * Parses all lines and returns head. Doesn't include comments or
+     * statement block markers.
+     * @param lines source file, separated by newline symbol
+     * @return first line of the execution sequence
+     * @throws InterpretationException
+     */
     public Line parse(List<String> lines) throws InterpretationException {
         if(lines.isEmpty()) return new Nop(chapter, 0, 0);
         try {

@@ -236,7 +236,7 @@ public enum LineType {
 
         @Override
         public boolean matches(String line, State state) {
-            return !escaped(state) && (line.isEmpty() || line.startsWith("//") || line.startsWith("#"));
+            return !escaped(state) && (line.isEmpty() || line.startsWith("//"));
         }
 
         /**
@@ -249,6 +249,23 @@ public enum LineType {
         public String makeLine(String... params) {
             if(params.length != 1) throw new IllegalArgumentException("Wrong params for COMMENT line");
             return "//" + params[0];
+        }
+    },
+    DIRECTIVE {
+        @Override
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) throws InterpretationException {
+            return new Directive(chapter, lineNumber, indent, line.substring(1));
+        }
+
+        @Override
+        public boolean matches(String line, State state) {
+            return !escaped(state) && line.startsWith("#");
+        }
+
+        @Override
+        public String makeLine(String... params) {
+            if(params.length != 1) throw new IllegalArgumentException("Wrong params for DIRECTIVE line");
+            return "#" + params[0];
         }
     },
     STATEMENT_BLOCK_MARKER {
@@ -309,7 +326,7 @@ public enum LineType {
     public abstract String makeLine(String... params);
 
     public static final LineType[] PRECEDENCE = new LineType[]
-            {COMMENT, STATEMENT_BLOCK_MARKER, STATEMENT, END_CHAPTER, QUESTION, ANSWER, INPUT, SPEECH, NARRATIVE};
+            {COMMENT, DIRECTIVE, STATEMENT_BLOCK_MARKER, STATEMENT, END_CHAPTER, QUESTION, ANSWER, INPUT, SPEECH, NARRATIVE};
 
     private static final String STATE_KEY_ESCAPED = "__!escaped__";
     private static final String STATE_KEY_INSIDE_BLOCK = "__!insideStatementBlock__";
