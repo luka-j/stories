@@ -27,9 +27,15 @@ import java.io.IOException;
 import java.util.*;
 
 public class Preprocessor {
+    private static final int MAX_DEFINE_LEVEL = 32;
+
     private static final String INCLUDE = "#include";
     private static final String DEFINE = "#define";
     private static final String UNDEFINE = "#undef";
+
+    private static final String IFDEFINED = "#ifdef";
+    private static final String IFNOTDEFINED = "#ifndef";
+    private static final String ENDIF = "#endif";
 
     private List<String> lines;
     public Preprocessor(List<String> lines) {
@@ -37,19 +43,28 @@ public class Preprocessor {
     }
 
     private Map<String, String> defines = new HashMap<>();
+    private Deque<Boolean> ifdefs = new ArrayDeque<>();
 
     public List<String> process(FileProvider files, String path) {
+        return process(files, path, 0);
+    }
+
+    private List<String> process(FileProvider files, String path, int level) {
+        if(level >= MAX_DEFINE_LEVEL)
+            throw new PreprocessingException("Too many #define levels! Check for circular defines");
+
         List<String> result = new ArrayList<>(lines.size());
+        boolean ignore = false;
         for(String line : lines) {
             String l = line.trim();
-            if(!l.startsWith("#")) result.add(replaceDefines(line));
+            if(!l.startsWith("#") && !ignore) result.add(replaceDefines(line));
             else {
                 if(l.startsWith(INCLUDE) && l.contains(" ")) {
                     File include = files.getSourceFile(path, l.split("\\s+", 2)[1]);
                     if(include != null && include.isFile()) {
                         try {
                             List<String> includeLines = Utils.readAllLines(include);
-                            result.addAll(includeLines);
+                            result.addAll(new Preprocessor(includeLines).process(files, path, level+1));
                         } catch (IOException e) {
                             throw new PreprocessingException("I/O exception while including file");
                         }
@@ -62,6 +77,16 @@ public class Preprocessor {
                     String[] tokens = l.split("\\s+", 2);
                     if(tokens.length < 2) defines.clear();
                     else defines.remove(tokens[1]);
+                } else if(l.startsWith(IFDEFINED) || l.startsWith(IFNOTDEFINED)) {
+                    String[] tokens = l.split("\\s+", 2);
+                    if(tokens.length < 2) continue;
+                    boolean sat = defines.containsKey(tokens[1]);
+                    if(l.startsWith(IFDEFINED)) sat = !sat;
+                    ifdefs.add(sat);
+                    if(sat) ignore = true;
+                } else if(l.startsWith(ENDIF)) {
+                    if(ifdefs.removeLast() && !ifdefs.contains(true)) ignore = false;
+                    //if removed element is true, and it doesn't contain any more `true`s
                 } else {
                     result.add(line); //let's keep directives for now - without #define substitution
                 }
