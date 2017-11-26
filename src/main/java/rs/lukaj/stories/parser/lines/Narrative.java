@@ -47,4 +47,8 @@ public class Narrative extends Line {
     public String generateCode(int indent) {
         return Utils.generateIndent(indent) + LINE_TYPE.makeLine(text);
     }
+
+    public String getRawText() {
+        return text;
+    }
 }

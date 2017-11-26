@@ -53,4 +53,8 @@ public class Speech extends Line {
     public String generateCode(int indent) {
         return Utils.generateIndent(indent) + LINE_TYPE.makeLine(character, text);
     }
+
+    public String getRawText() {
+        return text;
+    }
 }
