@@ -64,4 +64,8 @@ public class Answer extends Line implements AnswerLike<String> {
     public String getText(State state) {
         return Expressions.substituteVariables(text, state);
     }
+
+    public String getRawText() {
+        return text;
+    }
 }

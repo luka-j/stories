@@ -21,6 +21,7 @@ package rs.lukaj.stories.parser.lines;
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
+import rs.lukaj.stories.parser.Expressions;
 import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
 
@@ -107,17 +108,24 @@ public class Question extends Line {
 
     private int displayQuestion() {
         String[] answers = new String[this.answers.size()];
-        for(int i = 0; i< this.answers.size(); i++) answers[i] = this.answers.get(i).getContent(chapter.getState()).toString();
-        return chapter.getDisplay().showQuestion(text, character, getAvatar(character), time, answers);
+        for(int i = 0; i< this.answers.size(); i++)
+            answers[i] = this.answers.get(i).getContent(chapter.getState()).toString();
+        return chapter.getDisplay().showQuestion(Expressions.substituteVariables(text, chapter.getState()),
+                character, getAvatar(character), time, answers);
     }
 
     private int displayPictureQuestion() {
         File[] answers = new File[this.answers.size()];
         for(int i = 0; i< this.answers.size(); i++) answers[i] = ((PictureAnswer) this.answers.get(i)).getPicture();
-        return chapter.getDisplay().showPictureQuestion(text, character, getAvatar(character), time, answers);
+        return chapter.getDisplay().showPictureQuestion(Expressions.substituteVariables(text, chapter.getState()),
+                character, getAvatar(character), time, answers);
     }
 
     public String getVariable() {
         return variable;
+    }
+
+    public String getRawText() {
+        return text;
     }
 }
