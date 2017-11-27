@@ -1,6 +1,8 @@
 #this is a short test, meant for covering various ways of writing stuff here
  #not really representative
 
+#require __LANG_VERSION__ > 0 //this directive is basically an assert - make sure condition is fulfilled
+
 Hello World!
 \??? //everything starting with a backslash is either speech or narrative
 This is \//not a comment //this is, though, because backslash is usually an escape character all-round

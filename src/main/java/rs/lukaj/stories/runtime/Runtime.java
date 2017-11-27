@@ -31,6 +31,8 @@ import java.io.IOException;
  * Created by luka on 4.6.17..
  */
 public class Runtime {
+    public static final double VERSION = 0.1;
+
     private FileProvider files;
     private DisplayProvider display;
 

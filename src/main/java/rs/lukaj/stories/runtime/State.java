@@ -46,7 +46,9 @@ public class State implements VariableProvider {
 
     public static final String TRUE = "True";
     public static final String FALSE = "False";
+    private static final String VERSION = "__LANG_VERSION__";
 
+    //gawd I hate generics
     @SuppressWarnings("unchecked") //we do sorcery here
     private static class Value<T> {
 
@@ -141,6 +143,7 @@ public class State implements VariableProvider {
     private void setPredefinedConstants() {
         variables.put(TRUE, new Value<>(CONSTANT_DOUBLE, 1.));
         variables.put(FALSE, new Value<>(CONSTANT_DOUBLE, 0.));
+        variables.put(VERSION, new Value<>(CONSTANT_DOUBLE, Runtime.VERSION));
     }
 
     /**
@@ -218,11 +221,12 @@ public class State implements VariableProvider {
     }
 
     private Value<List<String>> getStringListImpl(String listName) {
-        Value<List<String>> list = variables.get(listName);
+        Value<List<?>> list = variables.get(listName);
         if(list == null) return null;
         if(list.type != STRING_LIST)
             throw new ExecutionException("Attempting to append to non-list variable");
-        return list;
+        return (Value<List<String>>)(Value<?>)list; //this wins the award for the most idiotic cast
+        //also, did I mention I hate the lame excuse for generics in Java?
     }
 
     public void addToList(String listName, String value) throws InterpretationException {
@@ -310,7 +314,7 @@ public class State implements VariableProvider {
         if(Utils.isDouble(name)) return Double.parseDouble(name);
         Value var = variables.get(name);
         if(var == null) return null;
-        if(var.type == Type.DOUBLE) return ((Number)var.value).doubleValue();
+        if(var.type.is(NUMERIC)) return ((Number)var.value).doubleValue();
         else return Double.NaN;
     }
 

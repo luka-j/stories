@@ -20,7 +20,10 @@ package rs.lukaj.stories.parser;
 
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.FileProvider;
+import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.exceptions.PreprocessingException;
+import rs.lukaj.stories.exceptions.RequireNotSatisfiedException;
+import rs.lukaj.stories.runtime.State;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +40,8 @@ public class Preprocessor {
     private static final String IFNOTDEFINED = "#ifndef";
     private static final String ENDIF = "#endif";
 
+    private static final String REQUIRE = "#require";
+
     private List<String> lines;
     public Preprocessor(List<String> lines) {
         this.lines = lines;
@@ -45,11 +50,11 @@ public class Preprocessor {
     private Map<String, String> defines = new HashMap<>();
     private Deque<Boolean> ifdefs = new ArrayDeque<>();
 
-    public List<String> process(FileProvider files, String path) {
-        return process(files, path, 0);
+    public List<String> process(FileProvider files, String path, State state) {
+        return process(files, path, state, 0);
     }
 
-    private List<String> process(FileProvider files, String path, int level) {
+    private List<String> process(FileProvider files, String path, State state, int level) {
         if(level >= MAX_DEFINE_LEVEL)
             throw new PreprocessingException("Too many #define levels! Check for circular defines");
 
@@ -64,7 +69,7 @@ public class Preprocessor {
                     if(include != null && include.isFile()) {
                         try {
                             List<String> includeLines = Utils.readAllLines(include);
-                            result.addAll(new Preprocessor(includeLines).process(files, path, level+1));
+                            result.addAll(new Preprocessor(includeLines).process(files, path, state, level+1));
                         } catch (IOException e) {
                             throw new PreprocessingException("I/O exception while including file");
                         }
@@ -87,6 +92,19 @@ public class Preprocessor {
                 } else if(l.startsWith(ENDIF)) {
                     if(ifdefs.removeLast() && !ifdefs.contains(true)) ignore = false;
                     //if removed element is true, and it doesn't contain any more `true`s
+                } else if(l.startsWith(REQUIRE)) {
+                    String[] tokens = l.split("\\s+", 2);
+                    if(tokens.length < 2) continue;
+                    int comm = tokens[1].indexOf("//");
+                    if(comm > 0)
+                        tokens[1] = tokens[1].substring(0, comm);
+                    try {
+                        Expressions expr = new Expressions(tokens[1], state);
+                        boolean sat = Type.isTruthy(expr.eval());
+                        if(!sat) throw new RequireNotSatisfiedException(expr.literal);
+                    } catch (InterpretationException e) {
+                        throw new PreprocessingException("Interpretation exception while evaluating #require", e);
+                    }
                 } else {
                     result.add(line); //let's keep directives for now - without #define substitution
                 }

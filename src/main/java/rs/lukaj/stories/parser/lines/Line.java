@@ -36,9 +36,6 @@ public abstract class Line {
     public abstract Line execute();
     public abstract String generateCode(int indent);
 
-    public int getIndent() {
-        return indent;
-    }
 
     public Line(Chapter chapter, int lineNumber, int indent) {
         this.chapter = chapter;
@@ -57,6 +54,10 @@ public abstract class Line {
 
     public Line getNextLine() {
         return nextLine;
+    }
+
+    public int getIndent() {
+        return indent;
     }
 
     public int getLineNumber() {
