@@ -20,6 +20,7 @@ package rs.lukaj.stories.runtime;
 
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.environment.DisplayProvider;
+import rs.lukaj.stories.environment.FileProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Parser;
 import rs.lukaj.stories.parser.Preprocessor;
@@ -74,6 +75,9 @@ public class Chapter {
 
     public DisplayProvider getDisplay() {
         return display;
+    }
+    public FileProvider getFileProvider() {
+        return book.getFiles();
     }
 
     public File getImage(String filePath) {

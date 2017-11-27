@@ -43,4 +43,8 @@ public interface FileProvider {
     File getRootDirectory(String path);
 
     boolean imageExists(String path);
+
+    default File getAvatar(String bookName, String path) {
+        return getImage(bookName + File.separator + path);
+    }
 }

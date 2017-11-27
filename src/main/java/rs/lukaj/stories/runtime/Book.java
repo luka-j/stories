@@ -226,7 +226,7 @@ public class Book {
         return new File(files.getRootDirectory(name), METADATA_FILENAME);
     }
 
-    protected FileProvider getFiles() {
+    public FileProvider getFiles() {
         return files;
     }
 }

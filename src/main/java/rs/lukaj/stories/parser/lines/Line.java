@@ -44,7 +44,7 @@ public abstract class Line {
     }
 
     protected File getAvatar(String character) {
-        return chapter.getImage(chapter.getState().getString(character));
+        return chapter.getFileProvider().getAvatar(chapter.getBook().getName(), chapter.getState().getString(character));
     }
 
     public void setNextLine(Line nextLine) throws InterpretationException {
