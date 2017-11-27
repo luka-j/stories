@@ -38,8 +38,7 @@ public class Narrative extends Line {
 
     @Override
     public Line execute() {
-        text = Expressions.substituteVariables(text, chapter.getState());
-        chapter.getDisplay().showNarrative(text);
+        chapter.getDisplay().showNarrative(Expressions.substituteVariables(text, chapter.getState()));
         return nextLine;
     }
 

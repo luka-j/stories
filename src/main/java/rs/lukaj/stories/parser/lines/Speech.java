@@ -44,8 +44,8 @@ public class Speech extends Line {
 
     @Override
     public Line execute() {
-        text = Expressions.substituteVariables(text, chapter.getState());
-        chapter.getDisplay().showSpeech(character, getAvatar(character), text);
+        chapter.getDisplay().showSpeech(character, getAvatar(character),
+                Expressions.substituteVariables(text, chapter.getState()));
         return nextLine;
     }
 
