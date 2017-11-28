@@ -21,12 +21,12 @@ package rs.lukaj.stories.environment;
 import java.io.File;
 
 public class LinuxDebugFiles implements FileProvider {
-    public static final File IMAGE_ROOT = new File("/data/Shared/Projects/Stories/images/");
+    public static final String IMAGES_FOLDER = "images";
     public static final File BOOKS_ROOT = new File("/data/Shared/Projects/Stories/books/");
 
     @Override
-    public File getImage(String path) {
-        return new File(IMAGE_ROOT, path);
+    public File getImage(String bookName, String path) {
+        return new File(BOOKS_ROOT, bookName + File.separator + IMAGES_FOLDER + File.separator + path);
     }
 
     @Override
@@ -42,10 +42,5 @@ public class LinuxDebugFiles implements FileProvider {
     @Override
     public File getRootDirectory(String path) {
         return getSourceDirectory(path);
-    }
-
-    @Override
-    public boolean imageExists(String path) {
-        return getImage(path).isFile();
     }
 }

@@ -34,17 +34,20 @@ public interface FileProvider {
      * @param path path to the image
      * @return File pointing to the image file
      */
-    File getImage(String path);
+    File getImage(String bookName, String path);
 
-    File getSourceDirectory(String path);
+    File getSourceDirectory(String bookName);
 
-    File getSourceFile(String rootPath, String filePath);
+    File getSourceFile(String bookName, String filePath);
 
-    File getRootDirectory(String path);
+    File getRootDirectory(String bookName);
 
-    boolean imageExists(String path);
+    default boolean imageExists(String bookName, String path) {
+        File img = getImage(bookName, path);
+        return img != null && img.isFile();
+    }
 
     default File getAvatar(String bookName, String path) {
-        return getImage(bookName + File.separator + path);
+        return getImage(bookName, path);
     }
 }
