@@ -178,11 +178,15 @@ public class Book {
     }
 
     public File getImage(String path) {
-        return files.getImage(name, path);
+        return files.getImage(generateImageFile(path));
     }
 
     public boolean imageExists(String path) {
-        return files.imageExists(name, path);
+        return files.imageExists(generateImageFile(path));
+    }
+
+    private String generateImageFile(String path) {
+        return name + File.separator + path;
     }
 
     public String getName() {

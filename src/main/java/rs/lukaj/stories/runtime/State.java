@@ -306,8 +306,8 @@ public class State implements VariableProvider {
         return Type.isTruthy(getDouble(name));
     }
 
-    public File getImage(String name, FileProvider files, String bookName) {
-        return files.getImage(bookName, getString(name));
+    public File getImage(String name, FileProvider files) {
+        return files.getImage(getString(name));
     }
 
     public Double getDouble(String name) {
