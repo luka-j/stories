@@ -65,7 +65,7 @@ public class PictureAnswer extends Line implements AnswerLike<File> {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, picture.getName()); //todo this works only for a narrow set of cases
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(variable, picture.getName()); //todo this works only for a narrow set of cases
     }
 }

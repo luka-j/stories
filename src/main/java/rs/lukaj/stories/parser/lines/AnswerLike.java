@@ -23,5 +23,5 @@ import rs.lukaj.stories.runtime.State;
 public interface AnswerLike<T> {
     String getVariable();
     T getContent(State state);
-    String generateCode(int indent);
+    String generateCode();
 }

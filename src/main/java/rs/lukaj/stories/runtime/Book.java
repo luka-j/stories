@@ -40,8 +40,8 @@ public class Book {
      * 1-based index of currently executing chapter, updated on chapter end
      * (i.e. on the end of the first chapter it is set to 2)
      */
-    protected static final String CURRENT_CHAPTER = "__chapter__";
-    protected static final String CURRENT_LINE = "__line__";
+    public static final String CURRENT_CHAPTER = "__chapter__";
+    public static final String CURRENT_LINE = "__line__";
     private static final String METADATA_FILENAME = ".info";
 
     private String name;

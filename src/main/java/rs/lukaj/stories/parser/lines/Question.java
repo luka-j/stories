@@ -79,11 +79,16 @@ public class Question extends Line {
         return retLine;
     }
 
+    public List<AnswerLike> getDisplayedAnswers() {
+        return answers;
+    }
+
     private Line getAnswers() {
         Line nextLine = this.nextLine;
         containsPictures = null;
         answers.clear();
-        while (nextLine.getIndent() > getIndent() && (nextLine instanceof AnswerLike || nextLine instanceof Statement)) {
+        while ((nextLine instanceof AnswerLike || nextLine instanceof Statement) && nextLine.getIndent() > getIndent()) {
+            //^^ fix in case nextLine == null - todo commit/push
             if(nextLine instanceof Answer) {
                 if(containsPictures == Boolean.TRUE) //do NOT simplify (can/will be null)
                     throw new ExecutionException("PictureAnswer when textual Answer expected!");
@@ -102,8 +107,8 @@ public class Question extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, String.valueOf(time), character, text);
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(variable, String.valueOf(time), character, text);
     }
 
     private int displayQuestion() {

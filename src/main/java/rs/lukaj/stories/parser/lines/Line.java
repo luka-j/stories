@@ -34,7 +34,7 @@ public abstract class Line {
     private final int lineNumber;
 
     public abstract Line execute();
-    public abstract String generateCode(int indent);
+    public abstract String generateCode();
 
 
     public Line(Chapter chapter, int lineNumber, int indent) {

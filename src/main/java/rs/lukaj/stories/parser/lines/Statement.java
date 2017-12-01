@@ -56,14 +56,14 @@ public abstract class Statement extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
+    public String generateCode() {
         StringBuilder stmt = generateStatement();
         if(this instanceof IfStatement) stmt.append('?');
         if(this instanceof LabelStatement) stmt.append(':');
         if(this instanceof ProcedureLabelStatement) stmt.insert(0, ':');
         if(this instanceof ReturnStatement) stmt.replace(0, stmt.length(), ">>");
         if(this instanceof GotoStatement) stmt.insert(0, '>');
-        return Utils.generateIndent(indent) + LineType.STATEMENT.makeLine(stmt.toString());
+        return Utils.generateIndent(getIndent()) + LineType.STATEMENT.makeLine(stmt.toString());
     }
 
     protected abstract StringBuilder generateStatement();

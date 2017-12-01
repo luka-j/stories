@@ -57,7 +57,7 @@ public class TextInput extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, hint);
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(variable, hint);
     }
 }

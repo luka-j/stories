@@ -19,6 +19,7 @@
 package rs.lukaj.stories.parser.lines;
 
 import rs.lukaj.stories.Utils;
+import rs.lukaj.stories.exceptions.ExecutionException;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.Expressions;
 import rs.lukaj.stories.parser.LineType;
@@ -50,8 +51,16 @@ public class Speech extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(character, text);
+    public String generateCode() {
+        try {
+            String var = null;
+            if (!chapter.getState().hasVariable(character))
+                var = new AssignStatement(chapter, getLineNumber() - 1, getIndent(), character, null).generateCode();
+            String speech = Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(character, text);
+            return var == null ? speech : var + "\n" + speech;
+        } catch (InterpretationException e) {
+            throw new ExecutionException("Cannot generate speech - variable name not valid", e);
+        }
     }
 
     public String getRawText() {

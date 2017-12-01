@@ -57,8 +57,8 @@ public class Answer extends Line implements AnswerLike<String> {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine(variable, text);
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(variable, text);
     }
 
     public String getText(State state) {

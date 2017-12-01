@@ -36,7 +36,7 @@ public class EndChapter extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LINE_TYPE.makeLine();
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine();
     }
 }

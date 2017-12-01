@@ -33,7 +33,7 @@ public class Nop extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LineType.COMMENT.makeLine("nop");
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LineType.COMMENT.makeLine("nop");
     }
 }
