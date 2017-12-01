@@ -47,7 +47,7 @@ public class DebugExecution {
             Line start = book.restart();
             List<String> lines = new ArrayList<>();
             while(start != null) {
-                lines.add(start.generateCode(start.getIndent()));
+                lines.add(start.generateCode());
                 start = start.getNextLine();
             }
             for(String line : lines)

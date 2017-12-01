@@ -23,8 +23,8 @@ public class Directive extends Line {
     }
 
     @Override
-    public String generateCode(int indent) {
-        return Utils.generateIndent(indent) + LineType.DIRECTIVE.makeLine(content);
+    public String generateCode() {
+        return Utils.generateIndent(getIndent()) + LineType.DIRECTIVE.makeLine(content);
     }
 
     public String getDirective() {
