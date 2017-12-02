@@ -30,4 +30,9 @@ public class Directive extends Line {
     public String getDirective() {
         return content;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Directive && ((Directive)obj).content.equals(content);
+    }
 }

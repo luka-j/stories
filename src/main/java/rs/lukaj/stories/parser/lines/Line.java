@@ -22,6 +22,8 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by luka on 3.6.17.
@@ -32,6 +34,7 @@ public abstract class Line {
 
     private final int indent;
     private final int lineNumber;
+    private final List<Directive> directives = new ArrayList<>();
 
     public abstract Line execute();
     public abstract String generateCode();
@@ -62,5 +65,13 @@ public abstract class Line {
 
     public int getLineNumber() {
         return lineNumber;
+    }
+
+    public void addDirectives(List<Directive> directives) {
+        this.directives.addAll(directives);
+    }
+
+    public List<Directive> getDirectives() {
+        return directives;
     }
 }

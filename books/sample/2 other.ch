@@ -12,6 +12,7 @@ char1: That's nice, I like [food+ish] too
 
 :>fun
 #undef is
+#!editor protected
 Your result is [ordinal]
 
 ::fun:

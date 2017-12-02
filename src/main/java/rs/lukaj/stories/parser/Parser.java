@@ -20,12 +20,10 @@ package rs.lukaj.stories.parser;
 
 import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
-import rs.lukaj.stories.parser.lines.GotoStatement;
-import rs.lukaj.stories.parser.lines.IfStatement;
-import rs.lukaj.stories.parser.lines.Line;
-import rs.lukaj.stories.parser.lines.Nop;
+import rs.lukaj.stories.parser.lines.*;
 import rs.lukaj.stories.runtime.Chapter;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +39,7 @@ public class Parser {
     private boolean insideStatementBlock;
     private int statementBlockIndent;
     private Chapter chapter;
+    private List<Directive> directiveStack = new ArrayList<>();
 
     public Parser(Chapter chapter) {
         this.chapter = chapter;
@@ -122,6 +121,11 @@ public class Parser {
 
         if(head == null) head = current;
         if(previousLine != null) previousLine.setNextLine(current);
+        if(current instanceof Directive) directiveStack.add((Directive) current);
+        else {
+            current.addDirectives(directiveStack);
+            directiveStack.clear();
+        }
         previousLine = current;
         return current;
     }
