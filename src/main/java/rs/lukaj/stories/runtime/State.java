@@ -204,7 +204,10 @@ public class State implements VariableProvider {
     public void setVariable(String name, String value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
-        if(value.startsWith("'")) value = value.substring(1);
+        if(value.startsWith("'")) {
+            value = value.substring(1);
+            if(hasVariable(value)) value = String.valueOf(getDouble(value));
+        }
         variables.put(name, new Value<>(Type.STRING, value));
     }
 

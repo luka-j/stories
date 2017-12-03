@@ -77,6 +77,7 @@ public class Expressions {
                     this.expression = new ExpressionBuilder(expression)
                             .implicitMultiplication(true)
                             .operator(Arrays.asList(Operators.operators()))
+                            .functions(Functions.functions())
                             .variables(state.getVariableNames())
                             .build();
                 } catch (IllegalArgumentException e) {

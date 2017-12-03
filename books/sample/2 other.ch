@@ -18,10 +18,12 @@ Your result is [ordinal]
 ::fun:
    :string='25 //this is a actually a string with value of 25 (ignoring ')
    #ifdef is //is isn't defined here anymore
-   :ordinal=string+1
+   :ordinal=string+3
    #endif
    #ifndef is
-   :ordinal=string+3
+   :rand = randomInt(122)
+   :str = 'rand
+   :ordinal=string+str
    #endif
    Hey, I look like a procedure (who am I kidding?)
 :>>
