@@ -32,7 +32,7 @@ public abstract class Line {
     protected Line nextLine;
     protected final Chapter chapter;
 
-    private final int indent;
+    private int indent;
     private final int lineNumber;
     private final List<Directive> directives = new ArrayList<>();
 
@@ -61,6 +61,10 @@ public abstract class Line {
 
     public int getIndent() {
         return indent;
+    }
+
+    public void setIndent(int indent) {
+        this.indent = indent;
     }
 
     public int getLineNumber() {
