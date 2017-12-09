@@ -73,6 +73,10 @@ public class GotoStatement extends Statement {
         if(jumpTo == null) throw new InterpretationException("Invalid label for goto");
     }
 
+    public String getTarget() {
+        return targetLabel;
+    }
+
     @Override
     protected StringBuilder generateStatement() {
         StringBuilder sb = new StringBuilder(targetLabel);
