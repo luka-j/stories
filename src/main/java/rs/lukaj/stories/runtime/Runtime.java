@@ -122,15 +122,17 @@ public class Runtime {
      */
     public void executeInTightLoop(boolean restart, boolean save) throws InterpretationException {
         if(restart) restartBook();
-        else if (!resumeBook()) return; //attempting to resume
+        else if (!resumeBook()) return; //attempting to resume ended book
         do {
-            while (next())
-                if(save)
+            while (next()) {
+                if (save)
                     try {
                         save();
                     } catch (IOException e) {
                         throw new ExecutionException("I/O exception while saving state", e);
                     }
+                if(Thread.currentThread().isInterrupted()) return;
+            }
             endChapter();
         } while (nextChapter());
     }
