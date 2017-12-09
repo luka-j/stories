@@ -123,6 +123,7 @@ public class Runtime {
     public void executeInTightLoop(boolean restart, boolean save) throws InterpretationException {
         if(restart) restartBook();
         else if (!resumeBook()) return; //attempting to resume ended book
+        if(Thread.currentThread().isInterrupted()) return;
         do {
             while (next()) {
                 if (save)
@@ -134,6 +135,7 @@ public class Runtime {
                 if(Thread.currentThread().isInterrupted()) return;
             }
             endChapter();
+            if(Thread.currentThread().isInterrupted()) return;
         } while (nextChapter());
     }
 
