@@ -117,7 +117,7 @@ public class AssignStatement extends Statement {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<variable.size(); i++) {
             sb.append(variable.get(i));
-            if(expression.get(i) != null)
+            if(expression.get(i) != null && expression.get(i).literal != null)
                 sb.append(" = ").append(expression.get(i).literal);
 
             sb.append(',');

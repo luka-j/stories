@@ -22,7 +22,6 @@ import rs.lukaj.stories.Utils;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.parser.LineType;
 import rs.lukaj.stories.runtime.Chapter;
-import rs.lukaj.stories.runtime.State;
 
 /**
  * Created by luka on 4.6.17..
@@ -36,7 +35,7 @@ public class TextInput extends Line {
     public TextInput(Chapter chapter, String variable, String hint, int lineNumber,
                      int indent) throws InterpretationException {
         super(chapter, lineNumber, indent);
-        State.checkName(variable);
+        chapter.getState().declareVariable(variable);
         this.variable = variable;
         this.hint = hint;
     }

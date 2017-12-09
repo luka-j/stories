@@ -35,4 +35,9 @@ public class Directive extends Line {
     public boolean equals(Object obj) {
         return obj instanceof Directive && ((Directive)obj).content.equals(content);
     }
+
+    @Override
+    public int hashCode() {
+        return content.hashCode();
+    }
 }
