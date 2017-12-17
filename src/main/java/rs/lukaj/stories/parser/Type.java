@@ -25,7 +25,8 @@ public enum Type {
     STRING(String.class, "S", 0),
     DOUBLE(Double.class, "D", P.NUMERIC),
     STRING_LIST(List.class, "S[", P.LIST),
-    CONSTANT_DOUBLE(Double.class, "C", P.NUMERIC | P.CONST);
+    CONSTANT_DOUBLE(Double.class, "C", P.NUMERIC | P.CONST),
+    CONSTANT_STRING(String.class, "L", P.CONST);
 
     public static class P {
         public static final int CONST = 1;

@@ -198,6 +198,7 @@ public class State implements VariableProvider {
      */
     public void undeclareVariable(String name) {
         if(name == null) return;
+        checkCanModify(name);
         variables.remove(name);
     }
 
@@ -221,6 +222,20 @@ public class State implements VariableProvider {
         checkName(name);
         checkCanModify(name);
         variables.put(name, new Value<>(Type.DOUBLE, value));
+    }
+
+    //setConstant methods are designed to be used by implementations to provide their own constants, if necessary
+    //once set, constants cannot be overriden, not even by these methods
+
+    public void setConstant(String name, String value) throws InterpretationException {
+        checkName(name);
+        checkCanModify(name);
+        variables.put(name, new Value<>(Type.CONSTANT_STRING, value));
+    }
+    public void setConstant(String name, double value) throws InterpretationException {
+        checkName(name);
+        checkCanModify(name);
+        variables.put(name, new Value<>(Type.CONSTANT_DOUBLE, value));
     }
 
     private Value<List<String>> getStringListImpl(String listName) {
