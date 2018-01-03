@@ -242,11 +242,17 @@ public class State implements VariableProvider {
         Value<List<?>> list = variables.get(listName);
         if(list == null) return null;
         if(list.type != STRING_LIST)
-            throw new ExecutionException("Attempting to append to non-list variable");
+            throw new ExecutionException("Attempting to modify a non-(String-)list variable");
         return (Value<List<String>>)(Value<?>)list; //this wins the award for the most idiotic cast
         //also, did I mention I hate the lame excuse for generics in Java?
     }
 
+    /**
+     * Add an element (a string) to the list.
+     * @param listName name of the list
+     * @param value value to be added
+     * @throws InterpretationException if list's name is invalid, or list is constant
+     */
     public void addToList(String listName, String value) throws InterpretationException {
         checkName(listName);
         checkCanModify(listName);
@@ -260,6 +266,21 @@ public class State implements VariableProvider {
         }
     }
 
+    /**
+     * Inserts an element to a specific position in a list.
+     * @param listName name of the list
+     * @param index index to which to insert the element, 0-based
+     * @param newValue value to be inserted
+     * @throws InterpretationException if {@link #addToList(String, String)} throws
+     */
+    public void insertToList(String listName, int index, String newValue) throws InterpretationException {
+        checkName(listName);
+        checkCanModify(listName);
+        Value<List<String>> list = getStringListImpl(listName);
+        if(list == null || index >= list.value.size()) addToList(listName, newValue);
+        else list.value.add(index, newValue);
+    }
+
     public void putList(String name, List<String> list) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
@@ -270,30 +291,37 @@ public class State implements VariableProvider {
      * Retrieves a member from {@link Type#STRING_LIST}. If list doesn't exist,
      * or index is out of bounds, null is returned.
      * @param listName name of the list
-     * @param index index of the desired member
+     * @param index index of the desired member, 0-based
      * @return listName[index]
      */
     public String getFromList(String listName, int index) {
         Value<List<String>> list = getStringListImpl(listName);
-        if(list == null || list.value.size() >= index) return null;
+        if(list == null || index >= list.value.size()) return null;
         return list.value.get(index);
     }
 
     /**
      * Removes a member from {@link Type#STRING_LIST} if it exists.
      * @param listName name of the list
-     * @param index index of the member to be removed
+     * @param index index of the member to be removed, 0-based
      */
     public void removeFromList(String listName, int index) {
         Value<List<String>> list = getStringListImpl(listName);
-        if(list == null || list.value.size() >= index) return;
+        if(list == null || index >= list.value.size()) return;
         else list.value.remove(index);
     }
 
+    /**
+     * Replaces specific element in list, if it exists. If it doesn't, adds it to the end.
+     * @param listName name of the list
+     * @param index index of the element to be replaced, 0-based
+     * @param newValue new value for the element
+     * @throws InterpretationException if {@link #addToList(String, String)} throws
+     */
     public void replaceInList(String listName, int index, String newValue) throws InterpretationException {
         Value<List<String>> list = getStringListImpl(listName);
         if(list == null) addToList(listName, newValue);
-        else if(list.value.size() >= index) list.value.add(newValue);
+        else if(index >= list.value.size()) list.value.add(newValue);
         else list.value.set(index, newValue);
     }
 
