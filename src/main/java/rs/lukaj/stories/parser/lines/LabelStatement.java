@@ -29,6 +29,8 @@ public class LabelStatement extends Statement {
         super(chapter, lineNumber, indent);
         if(label.contains("?") || label.contains(">"))
             throw new InterpretationException("Label shouldn't contain ? or >");
+        if(label.isEmpty())
+            throw new InterpretationException("Label shouldn't be empty!");
         this.label = label.substring(0, label.length()-1);
     }
 

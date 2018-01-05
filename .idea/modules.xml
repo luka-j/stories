@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/lib/exp4j/src/main/exp4j_main.iml" filepath="$PROJECT_DIR$/lib/exp4j/src/main/exp4j_main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/stories.iml" filepath="$PROJECT_DIR$/.idea/modules/stories.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/stories_main.iml" filepath="$PROJECT_DIR$/.idea/modules/stories_main.iml" group="stories" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/stories_test.iml" filepath="$PROJECT_DIR$/.idea/modules/stories_test.iml" group="stories" />

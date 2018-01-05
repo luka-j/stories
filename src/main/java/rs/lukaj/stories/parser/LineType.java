@@ -146,8 +146,12 @@ public enum LineType {
                     coeff = 60;
                     time = time.substring(0, time.length()-1);
                 }
-                double seconds = Double.parseDouble(time) * coeff;
-                return new TimedQuestion(chapter, var, text, charName, seconds, lineNumber, indent);
+                try {
+                    double seconds = Double.parseDouble(time) * coeff;
+                    return new TimedQuestion(chapter, var, text, charName, seconds, lineNumber, indent);
+                } catch (NumberFormatException e) {
+                    throw new InterpretationException("Invalid number for time!", e);
+                }
             }
         }
 
