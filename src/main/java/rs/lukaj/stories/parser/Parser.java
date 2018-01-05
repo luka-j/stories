@@ -38,8 +38,8 @@ public class Parser {
     private boolean finished = false;
     private boolean insideStatementBlock;
     private int statementBlockIndent;
-    private Chapter chapter;
-    private List<Directive> directiveStack = new ArrayList<>();
+    private final Chapter chapter;
+    private final List<Directive> directiveStack = new ArrayList<>();
 
     public Parser(Chapter chapter) {
         this.chapter = chapter;
@@ -50,7 +50,7 @@ public class Parser {
      * statement block markers.
      * @param lines source file, separated by newline symbol
      * @return first line of the execution sequence
-     * @throws InterpretationException
+     * @throws InterpretationException if anything goes wrong (literally anything)
      */
     public Line parse(List<String> lines) throws InterpretationException {
         if(lines.isEmpty()) return new Nop(chapter, 0, 0);
@@ -91,7 +91,7 @@ public class Parser {
      * Parses a single line and appends it to the end, using this Parser's context
      * @param line String representing this line (including whitespace)
      * @param lineNumber line number of this line
-     * @throws InterpretationException
+     * @throws InterpretationException if type cannot be deduced or line cannot be parsed
      */
     //this is one mess of a method honestly
     public Line parse(String line, int lineNumber) throws InterpretationException {

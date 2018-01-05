@@ -32,8 +32,8 @@ import java.util.List;
  */
 public class AssignStatement extends Statement {
 
-    private List<String> variable = new ArrayList<>();
-    private List<Expressions> expression = new ArrayList<>();
+    private final List<String> variable = new ArrayList<>();
+    private final List<Expressions> expression = new ArrayList<>();
 
     private static List<String> splitAssignments(String statement) {
         List<String> assignments = new ArrayList<>();

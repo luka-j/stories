@@ -47,8 +47,8 @@ public class Preprocessor {
         this.lines = lines;
     }
 
-    private Map<String, String> defines = new HashMap<>();
-    private Deque<Boolean> ifdefs = new ArrayDeque<>();
+    private final Map<String, String> defines = new HashMap<>();
+    private final Deque<Boolean> ifdefs = new ArrayDeque<>();
 
     public List<String> process(FileProvider files, String path, State state) {
         return process(files, path, state, 0);
@@ -114,7 +114,7 @@ public class Preprocessor {
         return result;
     }
 
-    private static Set<Character> tokenBreakChars = new HashSet<>();
+    private static final Set<Character> tokenBreakChars = new HashSet<>();
     static {
         tokenBreakChars.add(' ');
         tokenBreakChars.add('(');
@@ -132,11 +132,7 @@ public class Preprocessor {
             if(tokenBreakChars.contains(ch)) {
                 if(buff.length() > 0) {
                     String append = buff.toString();
-                    if (defines.containsKey(append)) {
-                        res.append(defines.get(append));
-                    } else {
-                        res.append(append);
-                    }
+                    res.append(defines.getOrDefault(append, append));
                     buff.delete(0, buff.length());
                 }
                 res.append(ch);
@@ -146,11 +142,7 @@ public class Preprocessor {
         }
 
         String append = buff.toString();
-        if (defines.containsKey(append)) {
-            res.append(defines.get(append));
-        } else {
-            res.append(append);
-        }
+        res.append(defines.getOrDefault(append, append));
 
         return res.toString();
     }

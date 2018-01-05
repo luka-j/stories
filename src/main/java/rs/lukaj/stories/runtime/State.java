@@ -138,7 +138,7 @@ public class State implements VariableProvider {
 
 
 
-    private Map<String, Value> variables = new HashMap<>();
+    private final Map<String, Value> variables = new HashMap<>();
 
     private void setPredefinedConstants() {
         variables.put(TRUE, new Value<>(CONSTANT_DOUBLE, 1.));
@@ -384,8 +384,7 @@ public class State implements VariableProvider {
     }
 
     public boolean isNumeric(String name) {
-        if(variables.get(name) == null) return false;
-        return variables.get(name).type.is(NUMERIC);
+        return variables.get(name) != null && variables.get(name).type.is(NUMERIC);
     }
 
     @Override

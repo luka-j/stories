@@ -28,7 +28,7 @@ import rs.lukaj.stories.runtime.Chapter;
  * Implementation-specific directives shall start with a special character (e.g. !)
  */
 public class Directive extends Line {
-    private String content;
+    private final String content;
 
     public Directive(Chapter chapter, int lineNumber, int indent, String content) {
         super(chapter, lineNumber, indent);

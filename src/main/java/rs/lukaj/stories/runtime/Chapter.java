@@ -42,7 +42,7 @@ public class Chapter {
     private DisplayProvider display; //t'is too
     private File source;
 
-    private Map<String, LabelStatement> labels = new HashMap<>();
+    private final Map<String, LabelStatement> labels = new HashMap<>();
 
     public Chapter(String name, Book book, State initialState, DisplayProvider display, File source) throws FileNotFoundException {
         if(!source.isFile()) throw new FileNotFoundException("Source doesn't exist: " + source.getAbsolutePath());

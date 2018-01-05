@@ -29,11 +29,11 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-           String[] tokens = line.split("\\s*(]|\\[)\\s*", 3);
-            if(tokens.length < 3)
+            String[] tokens = line.split("\\s*(]|\\[)\\s*", 3);
+            if (tokens.length < 3)
                 throw new InterpretationException("No variable for answer");
             Line ans;
-            if(chapter.imageExists(tokens[1])) {
+            if (chapter.imageExists(tokens[1])) {
                 ans = new PictureAnswer(chapter, tokens[1], chapter.getImage(tokens[2]), lineNumber, indent);
             } else {
                 ans = new Answer(chapter, tokens[1], tokens[2], lineNumber, indent);
@@ -59,7 +59,7 @@ public enum LineType {
          */
         @Override
         public String makeLine(String... params) {
-            if(params.length != 2) throw new IllegalArgumentException("Wrong params for ANSWER Line generation");
+            if (params.length != 2) throw new IllegalArgumentException("Wrong params for ANSWER Line generation");
             return "* [" + params[0] + "] " + params[1];
         }
     },
@@ -67,7 +67,7 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-            if(line.startsWith(":")) line = line.substring(1);
+            if (line.startsWith(":")) line = line.substring(1);
             //^ it doesn't have to start with : - e.g. in statement blocks
             return Statement.create(chapter, line, lineNumber, indent);
         }
@@ -91,8 +91,7 @@ public enum LineType {
     },
     NARRATIVE {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
-                throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) {
             return new Narrative(chapter, line, lineNumber, indent);
         }
 
@@ -102,9 +101,10 @@ public enum LineType {
         }
 
         /**
+         * @inheritDoc
          * Returns escaped narrative line.
          * [0] - narrative text
-         * @param params
+         * @param params [0] text for narrative
          * @return
          */
         @Override
@@ -116,35 +116,36 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-            if(!line.contains(":")) line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in questions
+            if (!line.contains(":"))
+                line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in questions
 
             String[] parts = line.substring(1).split("\\s*:\\s*", 2);
             String text = parts[1];
             String var = Utils.between(parts[0], '[', ']');
             String time = Utils.between(parts[0], '(', ')');
             String charName;
-            if(parts[0].indexOf("]") > parts[0].indexOf(")"))
+            if (parts[0].indexOf("]") > parts[0].indexOf(")"))
                 charName = Utils.between(line, ']', ':');
             else
                 charName = Utils.between(line, ')', ':');
-            if(time != null) time = time.trim();
-            if(var == null) throw new InterpretationException("Variable name for question is empty");
+            if (time != null) time = time.trim();
+            if (var == null) throw new InterpretationException("Variable name for question is empty");
             charName = charName.trim(); //this shouldn't be null (both ] and : must exist, otherwise NPE would be thrown earlier)
             var = var.trim();
 
-            if(time == null) {
+            if (time == null) {
                 return new Question(chapter, var, text, charName, lineNumber, indent);
             } else {
-                double coeff=1;
-                if(time.endsWith("ms")) {
-                    coeff = 1./1000;
-                    time = time.substring(0, time.length()-2);
-                } else if(time.endsWith("s")) {
+                double coeff = 1;
+                if (time.endsWith("ms")) {
+                    coeff = 1. / 1000;
+                    time = time.substring(0, time.length() - 2);
+                } else if (time.endsWith("s")) {
                     coeff = 1;
-                    time = time.substring(0, time.length()-1);
-                } else if(time.endsWith("m")) {
+                    time = time.substring(0, time.length() - 1);
+                } else if (time.endsWith("m")) {
                     coeff = 60;
-                    time = time.substring(0, time.length()-1);
+                    time = time.substring(0, time.length() - 1);
                 }
                 try {
                     double seconds = Double.parseDouble(time) * coeff;
@@ -171,8 +172,8 @@ public enum LineType {
          */
         @Override
         public String makeLine(String... params) {
-            if(params.length != 4) throw new IllegalArgumentException("Wrong params for QUESTION line");
-            if(params[1].equals("0.0"))
+            if (params.length != 4) throw new IllegalArgumentException("Wrong params for QUESTION line");
+            if (params[1].equals("0.0"))
                 return "?[" + params[0] + "] " + params[2] + ": " + params[3];
             else
                 return "?[" + params[0] + "] (" + params[1] + "s) " + params[2] + ": " + params[3];
@@ -201,7 +202,7 @@ public enum LineType {
          */
         @Override
         public String makeLine(String... params) {
-            if(params.length != 2) throw new IllegalArgumentException("Wrong params for SPEECH line");
+            if (params.length != 2) throw new IllegalArgumentException("Wrong params for SPEECH line");
             return "\\" + params[0] + ": " + params[1];
         }
     },
@@ -227,14 +228,13 @@ public enum LineType {
          */
         @Override
         public String makeLine(String... params) {
-            if(params.length != 2) throw new IllegalArgumentException("Wrong params for INPUT line");
+            if (params.length != 2) throw new IllegalArgumentException("Wrong params for INPUT line");
             return "[" + params[0] + "] " + params[1];
         }
     },
     COMMENT {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
-                throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) {
             return new Nop(chapter, lineNumber, indent); //this is a no-op
         }
 
@@ -251,13 +251,13 @@ public enum LineType {
          */
         @Override
         public String makeLine(String... params) {
-            if(params.length != 1) throw new IllegalArgumentException("Wrong params for COMMENT line");
+            if (params.length != 1) throw new IllegalArgumentException("Wrong params for COMMENT line");
             return "//" + params[0];
         }
     },
     DIRECTIVE {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter) throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) {
             return new Directive(chapter, lineNumber, indent, line.substring(1));
         }
 
@@ -268,14 +268,13 @@ public enum LineType {
 
         @Override
         public String makeLine(String... params) {
-            if(params.length != 1) throw new IllegalArgumentException("Wrong params for DIRECTIVE line");
+            if (params.length != 1) throw new IllegalArgumentException("Wrong params for DIRECTIVE line");
             return "#" + params[0];
         }
     },
     STATEMENT_BLOCK_MARKER {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter)
-                throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) {
             return new Nop(chapter, lineNumber, Utils.countLeadingSpaces(line)); //this is awkward (also disables generation)
         }
 
@@ -286,13 +285,13 @@ public enum LineType {
 
         @Override
         public String makeLine(String... params) {
-            if(params.length != 0) throw new IllegalArgumentException("Wrong params for STATEMENT_BLOCK_MARKER line");
+            if (params.length != 0) throw new IllegalArgumentException("Wrong params for STATEMENT_BLOCK_MARKER line");
             return ":::";
         }
     },
     END_CHAPTER {
         @Override
-        public Line parse(String line, int lineNumber, int indent, Chapter chapter) throws InterpretationException {
+        public Line parse(String line, int lineNumber, int indent, Chapter chapter) {
             return new EndChapter(chapter, lineNumber, indent);
         }
 
@@ -303,7 +302,7 @@ public enum LineType {
 
         @Override
         public String makeLine(String... params) {
-            if(params.length != 0) throw new IllegalArgumentException("Wrong params for END_CHAPTER line");
+            if (params.length != 0) throw new IllegalArgumentException("Wrong params for END_CHAPTER line");
             return ";;";
         }
     };
@@ -311,19 +310,22 @@ public enum LineType {
     /**
      * Parse given string to line. String should be trimmed, stripped of starting
      * backslashes and comments.
-     * @param line properly formatted string
+     *
+     * @param line       properly formatted string
      * @param lineNumber this line's number
-     * @param indent indentation of this line
-     * @param chapter chapter this line belongs to
+     * @param indent     indentation of this line
+     * @param chapter    chapter this line belongs to
      * @return parsed Line
      * @throws InterpretationException in case any error during parsing occurs
      */
     public abstract Line parse(String line, int lineNumber, int indent, Chapter chapter)
             throws InterpretationException;
+
     public abstract boolean matches(String line, State state);
 
     /**
      * Generate a line with syntax appropriate for the type, based on passed params.
+     *
      * @param params contains data for generating the line, different for each line type
      * @return line which when parsed returns an appropriate parser.lines.* representation
      */
@@ -334,9 +336,11 @@ public enum LineType {
 
     private static final String STATE_KEY_ESCAPED = "__!escaped__";
     private static final String STATE_KEY_INSIDE_BLOCK = "__!insideStatementBlock__";
+
     private static boolean escaped(State state) {
         return state.getBool(STATE_KEY_ESCAPED);
     }
+
     private static boolean insideStatementBlock(State state) {
         return state.getBool(STATE_KEY_INSIDE_BLOCK);
     }
@@ -345,8 +349,8 @@ public enum LineType {
             throws InterpretationException {
         state.setVariable(STATE_KEY_ESCAPED, escaped);
         state.setVariable(STATE_KEY_INSIDE_BLOCK, insideStatementBlock);
-        for(LineType t : PRECEDENCE)
-            if(t.matches(line, state))
+        for (LineType t : PRECEDENCE)
+            if (t.matches(line, state))
                 return t;
 
         throw new RuntimeException("No viable type for line: " + line);

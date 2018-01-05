@@ -33,8 +33,8 @@ import java.io.IOException;
 public class Runtime {
     public static final double VERSION = 0.1;
 
-    private FileProvider files;
-    private DisplayProvider display;
+    private final FileProvider files;
+    private final DisplayProvider display;
 
     private Book book;
     private Line current;
@@ -103,7 +103,7 @@ public class Runtime {
         return nextChapter();
     }
 
-    public void endChapter() throws InterpretationException {
+    public void endChapter() {
         book.endChapter();
     }
 

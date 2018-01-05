@@ -63,7 +63,7 @@ public class Utils {
     }
 
     public static String between(String str, char begin, char end) {
-        int b=0, e=0;
+        int b=0, e;
         while(b<str.length() && str.charAt(b) != begin) b++;
         b++;
         if(b>=str.length()) return null;
@@ -73,17 +73,14 @@ public class Utils {
         return str.substring(b, e);
     }
 
-    public static Comparator<String> enumeratedStringsComparator = new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            int n1=0, n2=0;
-            for(int i=0; i<o1.length() && isAsciiDigit(o1.charAt(i)); i++)
-                n1 = n1*10 + (o1.charAt(i) - '0');
-            for(int i=0; i<o2.length() && isAsciiDigit(o2.charAt(i)); i++)
-                n2 = n2*10 + (o2.charAt(i) - '0');
+    public static final Comparator<String> enumeratedStringsComparator = (o1, o2) -> {
+        int n1=0, n2=0;
+        for(int i=0; i<o1.length() && isAsciiDigit(o1.charAt(i)); i++)
+            n1 = n1*10 + (o1.charAt(i) - '0');
+        for(int i=0; i<o2.length() && isAsciiDigit(o2.charAt(i)); i++)
+            n2 = n2*10 + (o2.charAt(i) - '0');
 
-            return Integer.compare(n1, n2);
-        }
+        return Integer.compare(n1, n2);
     };
 
     public static boolean isAsciiDigit(char ch) {

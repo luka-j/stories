@@ -22,7 +22,7 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
 public class ReturnStatement extends Statement {
-    private ProcedureLabelStatement beginning;
+    private final ProcedureLabelStatement beginning;
 
     public ReturnStatement(Chapter chapter, int lineNumber, int indent) throws InterpretationException {
         super(chapter, lineNumber, indent);

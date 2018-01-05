@@ -38,7 +38,7 @@ public class Question extends Line {
     protected String variable;
     private String text;
     protected String character;
-    private List<AnswerLike> answers = new ArrayList<>();
+    private final List<AnswerLike> answers = new ArrayList<>();
     private Boolean containsPictures;
     private double time;
 

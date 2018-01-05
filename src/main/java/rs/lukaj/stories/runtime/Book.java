@@ -28,7 +28,6 @@ import rs.lukaj.stories.parser.lines.Line;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,13 +43,13 @@ public class Book {
     public static final String CURRENT_LINE = "__line__";
     private static final String METADATA_FILENAME = ".info";
 
-    private String name;
+    private final String name;
     private State info;
 
-    private FileProvider files;
-    private DisplayProvider display;
-    private List<File> chapters = new ArrayList<>();
-    private List<String> chapterNames = new ArrayList<>();
+    private final FileProvider files;
+    private final DisplayProvider display;
+    private final List<File> chapters = new ArrayList<>();
+    private final List<String> chapterNames = new ArrayList<>();
     private State state;
     private File stateFile;
 
@@ -61,12 +60,7 @@ public class Book {
         File sourceDir = files.getSourceDirectory(name);
         File rootDir = files.getRootDirectory(name);
         if(!sourceDir.isDirectory()) throw new LoadingException("Cannot find book source directory at " + sourceDir.getAbsolutePath());
-        String[] children = sourceDir.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name1) {
-                return name1.endsWith(".ch") && Character.isDigit(name1.charAt(0));
-            }
-        });
+        String[] children = sourceDir.list((dir, name1) -> name1.endsWith(".ch") && Character.isDigit(name1.charAt(0)));
         if(children == null || children.length == 0)
             throw new LoadingException("Cannot list() sources in source directory or there are no valid sources");
         stateFile = new File(rootDir, STATE_FILENAME);
@@ -82,9 +76,9 @@ public class Book {
         if(state == null) {
             state = new State();
         }
-        for(int i=0; i<children.length; i++) {
-            chapters.add(new File(sourceDir, children[i]));
-            chapterNames.add(getChapterName(children[i]));
+        for(String aChildren : children) {
+            chapters.add(new File(sourceDir, aChildren));
+            chapterNames.add(getChapterName(aChildren));
         }
     }
 
@@ -106,7 +100,7 @@ public class Book {
         return startFrom(chapterNo);
     }
 
-    protected void endChapter() throws InterpretationException {
+    protected void endChapter() {
         int current = state.getOrDefault(CURRENT_CHAPTER, 1).intValue();
         try {
             state.setVariable(CURRENT_CHAPTER, current + 1);

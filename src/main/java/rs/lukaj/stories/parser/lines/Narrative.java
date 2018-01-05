@@ -29,7 +29,7 @@ import rs.lukaj.stories.runtime.Chapter;
 public class Narrative extends Line {
     public static final LineType LINE_TYPE = LineType.NARRATIVE;
 
-    protected String text;
+    protected final String text;
 
     public Narrative(Chapter chapter, String text, int lineNumber, int indent) {
         super(chapter, lineNumber, indent);
