@@ -121,7 +121,7 @@ public class State implements VariableProvider {
         }
     }
 
-
+    private List<OnStateChangeListener> listeners = new ArrayList<>();
     private static final String SEP = ":";
     private static final Pattern INVALID_NAMES = Pattern.compile("^.*[&|%+*^<>=/\\\\\\-]+.*$|(.*([?:])$)");
 
@@ -162,6 +162,11 @@ public class State implements VariableProvider {
         }
     }
 
+    public void addOnStateChangeListener(OnStateChangeListener listener) {
+        if(listener != null)
+            listeners.add(listener);
+    }
+
     private void checkCanModify(String name) {
         if(variables.containsKey(name) && variables.get(name).type.is(CONST))
             throw new ExecutionException("Attempting to modify a const value");
@@ -189,6 +194,7 @@ public class State implements VariableProvider {
         checkName(name);
         //checkCanModify(name); //not needed - we aren't modifying anything already there
         variables.put(name, new Value<>(Type.NULL, null));
+        for(OnStateChangeListener listener : listeners) listener.onVariableDeclared(this, name);
     }
 
     /**
@@ -199,7 +205,9 @@ public class State implements VariableProvider {
     public void undeclareVariable(String name) {
         if(name == null) return;
         checkCanModify(name);
+        for(OnStateChangeListener listener : listeners) listener.beforeVariableUndeclared(this, name);
         variables.remove(name);
+        for(OnStateChangeListener listener : listeners) listener.afterVariableUndeclared(this, name);
     }
 
     public void setVariable(String name, String value) throws InterpretationException {
@@ -211,24 +219,31 @@ public class State implements VariableProvider {
                 value = value.substring(1);
                 if (hasVariable(value)) value = String.valueOf(getDouble(value));
             }
+            for(OnStateChangeListener listener : listeners) listener.beforeVariableSet(this, name);
             variables.put(name, new Value<>(Type.STRING, value));
+            for(OnStateChangeListener listener : listeners) listener.afterVariableSet(this, name, value);
         }
     }
 
     public void setVariable(String name, boolean value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
+        for(OnStateChangeListener listener : listeners) listener.beforeVariableSet(this, name);
         variables.put(name, new Value<>(Type.DOUBLE, value? 1. : 0.));
+        for(OnStateChangeListener listener : listeners) listener.afterVariableSet(this, name, value);
     }
 
     public void setVariable(String name, double value) throws InterpretationException {
         checkName(name);
         checkCanModify(name);
+        for(OnStateChangeListener listener : listeners) listener.beforeVariableSet(this, name);
         variables.put(name, new Value<>(Type.DOUBLE, value));
+        for(OnStateChangeListener listener : listeners) listener.afterVariableSet(this, name, value);
     }
 
     //setConstant methods are designed to be used by implementations to provide their own constants, if necessary
     //once set, constants cannot be overriden, not even by these methods
+    //also, these methods don't trigger listeners
 
     public void setConstant(String name, String value) throws InterpretationException {
         checkName(name);
