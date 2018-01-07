@@ -1,6 +1,6 @@
 /*
   Stories - an interactive storytelling language
-  Copyright (C) 2017 Luka Jovičić
+  Copyright (C) 2017-2018 Luka Jovičić
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published
