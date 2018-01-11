@@ -102,14 +102,20 @@ public class Parser {
         if(escaped) line = line.substring(1);
 
         LineType type;
+        boolean wasInsideStmtBlock = insideStatementBlock;
         if(insideStatementBlock && indent <= statementBlockIndent)
             insideStatementBlock = false;
 
         int commIndex = line.indexOf("//");
         if(commIndex > 0) line = stripComments(line);
+        if(insideStatementBlock && line.startsWith(":")) line = ":" + line; //workaround for PLS inside blocks
         type = getType(line, chapter.getState(), escaped, insideStatementBlock);
 
-        if(type == COMMENT) return COMMENT.parse(line, lineNumber, indent, chapter);
+        if(type == COMMENT) {
+            //we're ignoring indent of comments (and empty lines) in statement blocks
+            if(wasInsideStmtBlock) insideStatementBlock = true;
+            return COMMENT.parse(line, lineNumber, indent, chapter);
+        }
         if(type == STATEMENT_BLOCK_MARKER) {
             insideStatementBlock = true;
             statementBlockIndent = indent;
@@ -144,8 +150,8 @@ public class Parser {
                 ((GotoStatement)curr).setJump(chapter);
             } //addressing only forward jumps here
 
-            while(!indentStack.isEmpty() && curr.getIndent() <= indentStack.peekLast().a) {
-                indentStack.pollLast().b.setNextIfFalse(curr);
+            while(!indentStack.isEmpty() && curr.getIndent() <= indentStack.peek().a) {
+                indentStack.poll().b.setNextIfFalse(curr);
             }
             if(curr instanceof IfStatement) {
                 indentStack.push(new Pair<>(curr.getIndent(), (IfStatement) curr));

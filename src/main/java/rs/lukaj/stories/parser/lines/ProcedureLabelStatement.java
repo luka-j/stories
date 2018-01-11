@@ -22,6 +22,10 @@ import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.runtime.Chapter;
 
 //this doesn't really work (as a sane person would expect; otherwise it's fine)
+
+/**
+ * Only reachable by goto; otherwise, skips (doesn't execute) code up until return statement.
+ */
 public class ProcedureLabelStatement extends LabelStatement {
     protected GotoStatement jumpedFrom = null;
 

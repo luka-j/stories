@@ -43,10 +43,11 @@ public class IfStatement extends Statement {
 
     @Override
     public Line execute() {
-        if(Type.isTruthy(expression.eval()))
+        if(Type.isTruthy(expression.eval())) {
             return nextLine;
-        else
+        } else {
             return endIf;
+        }
     }
 
     public void setNextIfTrue(Line line) {
