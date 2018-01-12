@@ -101,7 +101,12 @@ public class Book {
     }
 
     protected void endChapter() {
-        int current = state.getOrDefault(CURRENT_CHAPTER, 1).intValue();
+        int current;
+        if(state.isNumeric(CURRENT_CHAPTER)) { //avoid getOrDefault - __chapter__ may be declared as null, i.e. =0
+            current = state.getDouble(CURRENT_CHAPTER).intValue();
+        } else {
+            current = 1;
+        }
         try {
             state.setVariable(CURRENT_CHAPTER, current + 1);
             state.setVariable(CURRENT_LINE, 0);
