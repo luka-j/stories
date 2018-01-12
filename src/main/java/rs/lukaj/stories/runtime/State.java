@@ -36,8 +36,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static rs.lukaj.stories.parser.Type.*;
-import static rs.lukaj.stories.parser.Type.P.CONST;
-import static rs.lukaj.stories.parser.Type.P.NUMERIC;
+import static rs.lukaj.stories.parser.Type.P.*;
 
 /**
  * Created by luka on 3.6.17..
@@ -89,7 +88,7 @@ public class State implements VariableProvider {
             }
         }
 
-        private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
+        private static DecimalFormat FORMAT = new DecimalFormat("0.##");
         @Override
         public String toString() {
             switch (type) {
@@ -256,6 +255,17 @@ public class State implements VariableProvider {
         variables.put(name, new Value<>(Type.CONSTANT_DOUBLE, value));
     }
 
+    /**
+     * Sets decimal format used by {@link #getString(String)} when getting a variable whose internal type is double.
+     * If supplied format is null, does nothing.
+     * @param format format to use for formatting double variables as strings
+     */
+    public void setDecimalFormat(DecimalFormat format) {
+        if(format != null) {
+            Value.FORMAT = format;
+        }
+    }
+
     private Value<List<String>> getStringListImpl(String listName) {
         Value<List<?>> list = variables.get(listName);
         if(list == null) return null;
@@ -366,6 +376,23 @@ public class State implements VariableProvider {
         return variables.get(name).toString();
     }
 
+    /**
+     * Returns value of a variable without type conversion. It can be (as of January 2018)
+     * a String, a Double, a List of Strings or null. Modifying anything returned from this
+     * method is safe, i.e. it won't affect the State itself. This method does not
+     * differentiate between declared-but-yet-unassigned and undeclared variables, and
+     * for both the return value will be null.
+     * @param name variable name
+     * @return raw value of the variable
+     */
+    @SuppressWarnings("unchecked")
+    public Object getObject(String name) {
+        if(Utils.isDouble(name)) return name;
+        if(!variables.containsKey(name)) return null;
+        else if(variables.get(name).type.is(LIST)) return new ArrayList<>((List<String>)variables.get(name));
+        else return variables.get(name).value;
+    }
+
     public boolean getBool(String name) {
         return Type.isTruthy(getDouble(name));
     }
@@ -402,8 +429,21 @@ public class State implements VariableProvider {
         return variables.get(name) != null && variables.get(name).type.is(NUMERIC);
     }
 
+    public boolean isAssigned(String name) {
+        return variables.containsKey(name) && variables.get(name).type != Type.NULL;
+    }
+
     @Override
     public boolean hasVariable(String name) {
         return variables.containsKey(name);
+    }
+
+    @Override
+    public Object clone() {
+        State clone = new State();
+        for(Map.Entry<String, Value> val : variables.entrySet()) {
+            clone.variables.put(val.getKey(), val.getValue()); //Value is immutable, so this is fine
+        }
+        return clone;
     }
 }

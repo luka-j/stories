@@ -94,7 +94,7 @@ public class Utils {
      *      false otherwise
      */
     public static boolean isDouble(String str) {
-        if(str == null) throw new NullPointerException("Variable name is null!");
+        if(str == null) return false;
         return DOUBLE_PATTERN.matcher(str).matches();
     }
 
