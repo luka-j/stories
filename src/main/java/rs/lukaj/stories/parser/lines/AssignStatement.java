@@ -119,6 +119,10 @@ public class AssignStatement extends Statement {
         return new ArrayList<>(variable);
     }
 
+    public List<Expressions> getExpressions() {
+        return new ArrayList<>(expression);
+    }
+
     @Override
     protected StringBuilder generateStatement() {
         StringBuilder sb = new StringBuilder();
