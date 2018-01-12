@@ -2,6 +2,9 @@
  #not really representative
 
 #require __LANG_VERSION__ > 0 //this directive is basically an assert - make sure condition is fulfilled
+#if 0 > 0
+#error yay it works
+#endif
 
 Hello World!
 \??? //everything starting with a backslash is either speech or narrative
@@ -30,5 +33,6 @@ character : Well hello there
   :ansYou? //this is equivalent to q=ansYou
     :>question //aand the famous goto
 
+:__chapter__=1
 ;; //this is a halt
 Hey, wait for me! (they won't, they're already long gone)

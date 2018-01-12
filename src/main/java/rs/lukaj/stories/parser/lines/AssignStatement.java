@@ -112,6 +112,13 @@ public class AssignStatement extends Statement {
         return nextLine;
     }
 
+    /**
+     * @return a list of variables affected by this AssignStatement
+     */
+    public List<String> getVariables() {
+        return new ArrayList<>(variable);
+    }
+
     @Override
     protected StringBuilder generateStatement() {
         StringBuilder sb = new StringBuilder();

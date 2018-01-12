@@ -137,7 +137,7 @@ public class State implements VariableProvider {
 
 
 
-    private final Map<String, Value> variables = new HashMap<>();
+    private final Map<String, Value> variables;
 
     private void setPredefinedConstants() {
         variables.put(TRUE, new Value<>(CONSTANT_DOUBLE, 1.));
@@ -149,16 +149,27 @@ public class State implements VariableProvider {
      * Creates an empty state object, with only predefined constants present.
      */
     public State() {
+        variables = new HashMap<>();
         setPredefinedConstants();
     }
 
     protected State(File file) throws IOException {
         List<String> vars = Utils.readAllLines(file);
+        variables = new HashMap<>();
         for(String var : vars) {
             String[] fields = var.split(SEP, 2);
             Value val = new Value(fields[1]);
             variables.put(fields[0], val);
         }
+    }
+
+    /**
+     * Creates a new State object with the same variables as the provided one, but without listeners
+     * associated to the original.
+     * @param state original state which should be copied.
+     */
+    public State(State state) {
+        variables = new HashMap<>(state.variables);
     }
 
     public void addOnStateChangeListener(OnStateChangeListener listener) {
@@ -436,14 +447,5 @@ public class State implements VariableProvider {
     @Override
     public boolean hasVariable(String name) {
         return variables.containsKey(name);
-    }
-
-    @Override
-    public Object clone() {
-        State clone = new State();
-        for(Map.Entry<String, Value> val : variables.entrySet()) {
-            clone.variables.put(val.getKey(), val.getValue()); //Value is immutable, so this is fine
-        }
-        return clone;
     }
 }

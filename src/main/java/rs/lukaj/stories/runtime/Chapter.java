@@ -59,7 +59,7 @@ public class Chapter {
 
         Parser parser = new Parser(this);
         Preprocessor pp = new Preprocessor(lines);
-        lines = pp.process(book.getFiles(), book.getName(), state);
+        lines = pp.process(book.getFiles(), book.getName(), new State(state));
         return parser.parse(lines);
     }
 

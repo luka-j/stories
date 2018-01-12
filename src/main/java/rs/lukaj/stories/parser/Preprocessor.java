@@ -23,6 +23,7 @@ import rs.lukaj.stories.environment.FileProvider;
 import rs.lukaj.stories.exceptions.InterpretationException;
 import rs.lukaj.stories.exceptions.PreprocessingException;
 import rs.lukaj.stories.exceptions.RequireNotSatisfiedException;
+import rs.lukaj.stories.exceptions.TriggerPreprocessorError;
 import rs.lukaj.stories.runtime.State;
 
 import java.io.File;
@@ -32,15 +33,17 @@ import java.util.*;
 public class Preprocessor {
     private static final int MAX_DEFINE_LEVEL = 32;
 
-    private static final String INCLUDE = "#include";
-    private static final String DEFINE = "#define";
-    private static final String UNDEFINE = "#undef";
+    private static final String INCLUDE = "#include ";
+    private static final String DEFINE = "#define ";
+    private static final String UNDEFINE = "#undef ";
 
-    private static final String IFDEFINED = "#ifdef";
-    private static final String IFNOTDEFINED = "#ifndef";
+    private static final String IF = "#if ";
+    private static final String ERROR = "#error";
+    private static final String IFDEFINED = "#ifdef ";
+    private static final String IFNOTDEFINED = "#ifndef ";
     private static final String ENDIF = "#endif";
 
-    private static final String REQUIRE = "#require";
+    private static final String REQUIRE = "#require ";
 
     private List<String> lines;
     public Preprocessor(List<String> lines) {
@@ -62,6 +65,7 @@ public class Preprocessor {
         boolean ignore = false;
         for(String line : lines) {
             String l = line.trim();
+            if(ignore && !l.startsWith(ENDIF) && !l.startsWith("#if")) continue;
             if(!l.startsWith("#") && !ignore) result.add(replaceDefines(line));
             else {
                 if(l.startsWith(INCLUDE) && l.contains(" ")) {
@@ -76,25 +80,43 @@ public class Preprocessor {
                     }
                 } else if(l.startsWith(DEFINE)) {
                     String[] tokens = l.split("\\s+", 3);
-                    if(tokens.length != 3) continue;
-                    defines.put(tokens[1], tokens[2]);
+                    String val = tokens.length < 3 ? "" : tokens[2];
+                    defines.put(tokens[1], val);
+                    try {
+                        state.setVariable(tokens[1], val); //this is fine, as provided State is only a copy
+                    } catch (InterpretationException e) {
+                        ; //ignore if isn't a valid variable name
+                    }
                 } else if(l.startsWith(UNDEFINE)) {
                     String[] tokens = l.split("\\s+", 2);
-                    if(tokens.length < 2) defines.clear();
-                    else defines.remove(tokens[1]);
+                    //if(tokens.length < 2) defines.clear(); //won't really happen, as directives have trailing space
+                    defines.remove(tokens[1]);
                 } else if(l.startsWith(IFDEFINED) || l.startsWith(IFNOTDEFINED)) {
                     String[] tokens = l.split("\\s+", 2);
-                    if(tokens.length < 2) continue;
                     boolean sat = defines.containsKey(tokens[1]);
-                    if(l.startsWith(IFDEFINED)) sat = !sat;
+                    if(l.startsWith(IFNOTDEFINED)) sat = !sat;
                     ifdefs.add(sat);
-                    if(sat) ignore = true;
-                } else if(l.startsWith(ENDIF)) {
-                    if(ifdefs.removeLast() && !ifdefs.contains(true)) ignore = false;
+                    if(!sat) ignore = true;
+                } else if(l.startsWith(IF)) {
+                    String[] tokens = l.split("\\s+", 2);
+                    try {
+                        boolean sat;
+                        Expressions expr = new Expressions(tokens[1], state);
+                        sat = Type.isTruthy(expr.eval());
+                        ifdefs.add(sat);
+                        if (!sat) ignore = true;
+                    } catch (InterpretationException e) {
+                        ;
+                    }
+                } else if(l.equals(ENDIF)) {
+                    if(!ifdefs.removeLast() && !ifdefs.contains(false)) ignore = false;
                     //if removed element is true, and it doesn't contain any more `true`s
+                } else if(l.equals(ERROR)) {
+                    String[] tokens = l.split("\\s+", 2);
+                    String msg = tokens.length == 2 ? tokens[1] : "";
+                    throw new TriggerPreprocessorError(msg);
                 } else if(l.startsWith(REQUIRE)) {
                     String[] tokens = l.split("\\s+", 2);
-                    if(tokens.length < 2) continue;
                     int comm = tokens[1].indexOf("//");
                     if(comm > 0)
                         tokens[1] = tokens[1].substring(0, comm);
@@ -124,6 +146,7 @@ public class Preprocessor {
         tokenBreakChars.add('?');
         tokenBreakChars.add(':');
         tokenBreakChars.add('>');
+        tokenBreakChars.add('!');
     }
     private String replaceDefines(String line) {
         StringBuilder res = new StringBuilder(line.length()), buff = new StringBuilder(32);
