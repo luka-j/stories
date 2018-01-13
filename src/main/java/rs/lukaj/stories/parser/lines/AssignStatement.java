@@ -81,11 +81,15 @@ public class AssignStatement extends Statement {
     }
 
     public AssignStatement(Chapter chapter, int lineNumber, int indent, String variable, String expression) throws InterpretationException {
+        this(chapter, lineNumber, indent, variable, new Expressions(expression, chapter.getState()));
+    }
+
+    public AssignStatement(Chapter chapter, int lineNumber, int indent, String variable, Expressions expression) throws InterpretationException {
         super(chapter, lineNumber, indent);
         if(!(variable.startsWith("!") && chapter.getState().hasVariable(variable.substring(1))))
             chapter.getState().declareVariable(variable);
         this.variable.add(variable);
-        this.expression.add(new Expressions(expression, chapter.getState()));
+        this.expression.add(expression);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class Expressions {
     } //todo how do we actually concat string literals which contain these?
 
     private enum ExprType {
-        BASIC, STRING, NUMERIC
+        BASIC, STRING, NUMERIC, BASIC_NEGATION
     }
     private ExprType type;
     private Object value;
@@ -67,6 +67,9 @@ public class Expressions {
         } else if(state.hasVariable(expression)) {
             type = ExprType.BASIC;
             variable = expression;
+        } else if(expression.charAt(0) == '!' && state.hasVariable(expression.substring(1))) {
+            type = ExprType.BASIC_NEGATION;
+            variable = expression.substring(1);
         } else {
             if(isStringExpression(expression)) {
                 type = ExprType.STRING;
@@ -114,6 +117,8 @@ public class Expressions {
                 if(value != null) return value;
                 if(state.isNumeric(variable)) return state.getDouble(variable);
                 else return state.getString(variable);
+            case BASIC_NEGATION:
+                return Type.isTruthy(state.getObject(variable)) ? 0. : 1.;
             case STRING: return evalAddition(value.toString(), state);
             case NUMERIC: return expression.setVariableProvider(state).evaluate();
             default: throw new IllegalStateException("Illegal expression type"); //this shouldn't happen
@@ -128,13 +133,13 @@ public class Expressions {
             sides[0] = sides[0].substring(0, sides[0].length()-1);
         }
         if(sides.length > 2) throw new ExecutionException("malformed basic expression: multiple =");
-        String[] vars = sides[sides.length-1].split("\\s*\\+\\s*");
+        String[] rvars = sides[sides.length-1].split("\\s*\\+\\s*");
         boolean isNumeric = true;
         double sum = 0;
         if(!state.isNumeric(sides[0])) {
             isNumeric = false;
         } else {
-            for(String var : vars) {
+            for(String var : rvars) {
                 if(!state.isNumeric(var)) {
                     isNumeric = false;
                     break;
@@ -150,22 +155,29 @@ public class Expressions {
             else return 0;
         }
 
-        if(sides.length == 2 && !state.isNumeric(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
+        if(sides.length == 2 && !state.isNumeric(sides[0]) && state.hasVariable(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
             return negation ? 0 : 1;
             //the idea is to support expressions such as q=ans where ans is a variable, and q
             //is supposed to have the value ans
             //no idea how to put that into grammar
         }
-        StringBuilder res = new StringBuilder();
+        StringBuilder rhs = new StringBuilder();
         String var;
-        for(String str : vars)
+        for(String str : rvars)
             if((var=state.getString(str)) != null)
-                res.append(var);
+                rhs.append(var);
             else
-                res.append(str);
-        if(sides.length == 1) return res.toString();
+                rhs.append(str);
+        if(sides.length == 1) return rhs.toString();
         else {
-            boolean ret = res.toString().equals(state.getString(sides[0])); //doesn't work
+            StringBuilder lhs = new StringBuilder();
+            String[] lvars = sides[0].split("\\s*\\+\\s*");
+            for(String str : lvars)
+                if((var=state.getString(str)) != null)
+                    lhs.append(var);
+                else
+                    lhs.append(str);
+            boolean ret = rhs.toString().equals(lhs.toString());
             if(ret ^ negation) return 1;
             else return 0;
         }

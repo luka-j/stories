@@ -74,6 +74,15 @@ public class Operators {
                 }
             };
 
+    public static final Operator neq =
+            new Operator("!=", 2, true, PRECEDENCE_COMPARISON) {
+                @Override
+                public double apply(double... args) {
+                    if(args[0] != args[1]) return 1;
+                    else return 0;
+                }
+            };
+
     public static final Operator and =
             new Operator("&", 2, true, PRECEDENCE_AND) {
                 @Override
@@ -102,7 +111,7 @@ public class Operators {
             };
 
     public static Operator[] operators() {
-        return new Operator[] {gt, gte, lt, lte, eq, and, or, not};
+        return new Operator[] {gt, gte, lt, lte, eq, neq, and, or, not};
     }
 
 }

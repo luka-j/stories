@@ -55,7 +55,7 @@ public class Speech extends Line {
         try {
             String var = null;
             if (!chapter.getState().hasVariable(character))
-                var = new AssignStatement(chapter, getLineNumber() - 1, getIndent(), character, null).generateCode();
+                var = new AssignStatement(chapter, getLineNumber() - 1, getIndent(), character, (String)null).generateCode();
             String speech = Utils.generateIndent(getIndent()) + LINE_TYPE.makeLine(character, text);
             return var == null ? speech : var + "\n" + speech;
         } catch (InterpretationException e) {

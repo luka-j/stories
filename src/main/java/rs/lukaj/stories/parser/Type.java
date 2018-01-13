@@ -47,12 +47,14 @@ public enum Type {
     public static boolean isTruthy(Object value) {
         if(value instanceof Number) {
             Double doubleVal = ((Number)value).doubleValue();
-            return doubleVal != 0 && doubleVal != Double.NaN;
+            return doubleVal != 0 && !Double.isNaN(doubleVal);
         } else if(value instanceof String) {
             String str = value.toString();
             return !str.isEmpty();
         } else if(value instanceof List) {
             return !((List) value).isEmpty();
+        } else if(value instanceof Boolean) {
+            return (Boolean)value;
         } else {
             return false; //this can be thought about... later
         }
