@@ -3,7 +3,6 @@
 
 [![](https://jitpack.io/v/luq-0/stories.svg)](https://jitpack.io/#luq-0/stories)
 
-A very much work in progress. More details to come soon.
 For early and probably confusing sneak peek look at books/sample.
 This project consists of a [exp4j](https://github.com/luq-0/exp4j) fork
 as well, though it should probably belong in a separate module.
@@ -14,10 +13,6 @@ Almost as pretty as php, but thankfully much smaller and less
 general-purpose. Turing complete, though implementing any non-trivial
 algorithm will probably be quite tedious.
 
-*By the way, this is seeing a shitload of releases at the moment because
-I'm developing my other project which includes this library and need
-a release any time I want to incorporate a modification*
-
 ## Idea
 
 Provide an open-source language and interpreter for creating
@@ -26,6 +21,9 @@ plot of the story by making their own choices. Most of the stories
 should consist of dialogue, with some optional narrative. The user
 should steer only the behaviour of one character by making choices in
 their name, though this is in no way required.
+
+Because the language is Turing complete, by nature it allows arbitrary
+programs to be written, in form of conversational interfaces.
 
 ## Aim
 
@@ -57,11 +55,15 @@ Main point of entry for this library is the `.runtime.Runtime` class.
 
 ## Exceptions
 
-There are three types of exceptions which can be raised, residing in the
+There are four types of exceptions which can be raised, residing in the
 `.exceptions` package.
 
 LoadingException is thrown in case the book can't be loaded. This occurs
 before interpretation phase, and is most likely an I/O error.
+
+PreprocessingException and subtypes are raised during the preprocessing
+phase. It be either a malformed # directive or directive which explicitly
+raises the exception (#require or #error).
 
 InterpretationException signals an error during the transforming the
 source into sensible model and is most likely a syntax error.
@@ -76,9 +78,9 @@ shall be inspected further in order to determine the cause.
 Top-level object is a Book, which is broken up into chapters. The book
 consists of a title and optional metadata and represents one story.
 One or more chapters are where the actual content resides. Progress is
-saved after each chapter. All chapters share the same state and scope.
-Chapters consist of line-separated statements which manipulate state
-or show output to the user.
+by default saved after each chapter. All chapters share the same state
+and scope. Chapters consist of line-separated statements which
+manipulate state or show output to the user.
 
 #### Files
 
@@ -105,7 +107,7 @@ inside source directory obtained by `FileProvider#getSourceDirectory(String)`
 where `{no}` _shall_ be chapter number as a positive integer, starting
 at one, and `{chapter name}` is treated as the name of the chapter.
 These _must_ be separated by a space. Chapters are loaded in order of
-their `{no}`s, so chapter numbers_needn't_ be consecutive, but only in
+their `{no}`s, so chapter numbers _needn't_ be consecutive, but only in
 natural order.
 
 ## State and variables
@@ -119,7 +121,7 @@ expected. `Double` is wrapped into a `String` when used in a context
 where `String` is expected. There is a `Boolean` type which is a `Double`,
 1 for true and 0 for false value. 0 and NaN evaluate as false, and any
 other value as true. All Doubles but 0 are truthy values, while any
-String but an empty one is falsy. `True` and `False` are predefined
+String but an empty one is truthy. `True` and `False` are predefined
 constant variables which will raise an ExecutionException in case their
 modification is attempted, initialized to 1.0 and 0.0 respectively.
 
@@ -130,13 +132,15 @@ an initial value, including unanswered timed questions.
 #### Evaluating expressions
 
 If the expression contains only numeric (i.e. Double) variables or
-consists of either &, |, !, <, >, *, /, ^ or - operator, it is a
+consists of either &, |, <, >, *, /, ^ or - operator, it is a
 numeric expression. Otherwise, it's a string expression.
 
 In string expressions, + represents concatenation operator and = string
 equality which is case-sensitive. All doubles are treated as strings in
 this context. Result of concatenation is a string, and of equality
-comparison a boolean.
+comparison a boolean. Expression in form !string can be used to check
+for string emptiness (or nullity, as those are the same): it returns
+1 (true) if string is empty, 0 (false) otherwise.
 
 In numeric expressions, = represents equality, < and > less than and
 greater than respectively, <= and >= greater than or equal and less than
@@ -153,7 +157,7 @@ exp4j.
 
 #### Predefined constants and functions
 
-Predefined constants are `true` which equals to 1.0 and `false` which
+Predefined constants are `True` which equals to 1.0 and `False` which
 equals to 0.0.
 
 Predefined functions are sin, cos, tan, cot, log, log2, log10, log1p,
@@ -164,8 +168,8 @@ exp, expm1 and signum as defined in exp4j.
 
 Variable names _mustn't_ be empty strings.
 Variable names _must_ start with either a letter or a underscore (_).
-Variable names _mustn't_ include any operator character or a question
-mark (?) or a colon (:).
+Variable names _mustn't_ include any operator character, a question
+mark (?), a colon (:) or whitespace.
 Additionally, variable name cannot be equal (in a case-sensitive way)
 to any of the predefined constants or functions.
 
@@ -204,6 +208,9 @@ uses line count which is part of Line object to keep track of last
 executed line, and upon resume it loads first line whose line count is
 less or equal to the value of \_\_line\_\_.
 
+Special constant is \_\_LANG\_VERSION\_\_ which stores language version
+as numeric value.
+
 ## Syntax and statements
 
 ### Source file structure
@@ -223,6 +230,15 @@ usage is discouraged.
 Lines starting with double slashes (//) or a number sign (#) are
 comments and are ignored (i.e. they are thrown away while parsing).
 
+##### Statement block marker
+Lines which equal three colons (i.e. :::) are statement block markers.
+All lines following them with larger indent are treated as procedural
+statements (with leading :), except if they start with backslash in
+which case they are treated as either Speech or Narrative. Comments are
+ignored and not counted for determining block indent, meaning you can
+have lesser indented comment inside statement block without it affecting
+the 'larger indent' chain.
+
 ##### Procedural statements
 Lines starting with a colon (:) are procedural statements and modify
 either the state or the flow. There are several types:
@@ -230,13 +246,17 @@ either the state or the flow. There are several types:
 Procedural statements ending with a question mark (?) are if-statements.
 Their body is evaluated, and if the result is truthy, execution carries
 on to the next line. If the result is falsy, execution jumps to the next
-line with the same indent. Body of the if-statement (i.e. statements
-which are executed only if the result is truthy) _must_ have indent
-larger than that of the if-statement. If indent is smaller,
-InterpretationException is thrown.
+line with the same or less indent. Body of the if-statement (i.e.
+statements which are executed only if the result is truthy) _must_ have
+indent larger than that of the if-statement.
 
 Procedural statements ending with a colon (:) are labels and mark a
 certain place in code. They are no-ops.
+
+Procedural statements starting and ending with a colon (:) are procedural
+labels. When reached through normal execution (i.e. not by goto), they
+jump to next return-statement. When reached by goto, they memorize
+the goto from which the jump was made.
 
 Procedural statements starting with a greater than sign (>, i.e. :>)
 are goto-statements. Body of a goto-statement _must_ be a label. When
@@ -244,14 +264,25 @@ execution reaches a goto-statement, it is redirected to the label and
 continues from there on. In case there is no label with the name
 designated by a goto-statement an InterpretationException is thrown.
 
+Procedural statement equalling two greater then signs (i.e. :>>) is a
+return-statement. They _must_ follow a procedural label. When reached,
+they jump to the goto which associated procedural label memorized. These
+can be used to simulate simple procedures, with an important cavaet
+that recursion isn't allowed since there is no stack.
+
 All other procedural statements are evaluated as assign-statements.
-Assign-statements are split on the first equals (=) sign. First part
+Assign-statements are a comma-separated list of assignments.
+Assignments are split on the first equals (=) sign. First part
 represents a variable name and the second an expression to be
 evaluated. First part _must_ be a valid variable name, otherwise an
 InterpretationException is thrown. In case there are no equals signs
 in the assign-statement body, expression is set to empty string.
 At runtime, the expression is evaluated, and it is stored into the
 appropriately named variable.
+
+##### Halt
+Lines which equal ;; are unconditional halts. They end the current
+chapter.
 
 ##### Questions
 Lines starting with a question mark (?) are questions to which the end
@@ -293,6 +324,9 @@ names or use an extension when referring to the picture. Picture
 question's answers are presented as pictures instead of textual answers
 to the user, and are otherwise identical to the textual questions.
 
+_Note: there are no implementations which support picture questions at
+this moment._
+
 ##### Textual input
 Lines starting with an opening square bracket (\[) and containing a
 closing square bracket (\]) are signal for requesting textual input from
@@ -320,9 +354,9 @@ as such.
 
 //todo escaping, variable substitution
 
-//todo statement blocks, conditional goto, nesting
+//todo conditional goto
 
-//todo halt, procedures, and god knows what else I've added in the meantime
+//todo procedures, and god knows what else I've added in the meantime
 
 //todo # directives
 
