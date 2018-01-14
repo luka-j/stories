@@ -68,9 +68,16 @@ public class AssignStatement extends Statement {
             String varName = tokens[0].trim();
             if(!(tokens.length == 1 && varName.startsWith("!") && chapter.getState().hasVariable(varName.substring(1))))
                 chapter.getState().declareVariable(varName);
+            boolean undecl = false;
+            if(tokens.length == 1 && varName.charAt(0) == '!') {
+                varName = varName.substring(1);
+                undecl = true;
+            }
             variable.add(varName);
             if (tokens.length > 1)
                 expression.add(new Expressions(tokens[1].trim(), chapter.getState()));
+            else if(undecl)
+                expression.add(new Expressions(null, chapter.getState()).setDecl(false));
             else
                 expression.add(null);
         }
@@ -98,10 +105,11 @@ public class AssignStatement extends Statement {
         for(int i=0; i<variable.size(); i++) {
             String variable = this.variable.get(i);
             Expressions expression = this.expression.get(i);
-            if(variable.startsWith("!")) {
-                state.undeclareVariable(variable.substring(1));
-            }
             if(expression == null) continue;
+            if(expression.isUndecl()) {
+                state.undeclareVariable(variable);
+                continue;
+            }
 
             try {
                 Object res = expression.eval();

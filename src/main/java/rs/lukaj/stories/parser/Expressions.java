@@ -46,7 +46,7 @@ public class Expressions {
     } //todo how do we actually concat string literals which contain these?
 
     private enum ExprType {
-        BASIC, STRING, NUMERIC, BASIC_NEGATION
+        BASIC, STRING, NUMERIC, BASIC_NEGATION, UNDECL
     }
     private ExprType type;
     private Object value;
@@ -90,6 +90,15 @@ public class Expressions {
         }
     }
 
+    public Expressions setDecl(boolean decl) {
+        if(!decl) type = ExprType.UNDECL;
+        return this;
+    }
+
+    public boolean isUndecl() {
+        return type == ExprType.UNDECL;
+    }
+
     /**
      * Checks whether expression contains any of the {@link #nonStringOps}
      * or a ! not followed by a = (!= is inequality operator, which is
@@ -121,6 +130,7 @@ public class Expressions {
                 return Type.isTruthy(state.getObject(variable)) ? 0. : 1.;
             case STRING: return evalAddition(value.toString(), state);
             case NUMERIC: return expression.setVariableProvider(state).evaluate();
+            case UNDECL: return null;
             default: throw new IllegalStateException("Illegal expression type"); //this shouldn't happen
         }
     }
