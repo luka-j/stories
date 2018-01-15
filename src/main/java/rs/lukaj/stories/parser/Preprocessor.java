@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Preprocessor {
-    private static final int MAX_DEFINE_LEVEL = 32;
+    private static final int MAX_INCLUDE_LEVEL = 32;
 
     private static final String INCLUDE = "#include ";
     private static final String DEFINE = "#define ";
@@ -58,8 +58,8 @@ public class Preprocessor {
     }
 
     private List<String> process(FileProvider files, String path, State state, int level) {
-        if(level >= MAX_DEFINE_LEVEL)
-            throw new PreprocessingException("Too many #define levels! Check for circular defines");
+        if(level >= MAX_INCLUDE_LEVEL)
+            throw new PreprocessingException("Too many #include levels! Check for circular includes");
 
         List<String> result = new ArrayList<>(lines.size());
         boolean ignore = false;
@@ -80,7 +80,7 @@ public class Preprocessor {
                     }
                 } else if(l.startsWith(DEFINE)) {
                     String[] tokens = l.split("\\s+", 3);
-                    String val = tokens.length < 3 ? "" : tokens[2];
+                    String val = tokens.length < 3 ? tokens[1] : tokens[2];
                     defines.put(tokens[1], val);
                     try {
                         state.setVariable(tokens[1], val); //this is fine, as provided State is only a copy

@@ -3,6 +3,8 @@
 
 [![](https://jitpack.io/v/luq-0/stories.svg)](https://jitpack.io/#luq-0/stories)
 
+_Looking for Android special variables? See [here](https://github.com/luq-0/stories/android-vars.md)_
+
 For early and probably confusing sneak peek look at books/sample.
 This project consists of a [exp4j](https://github.com/luq-0/exp4j) fork
 as well, though it should probably belong in a separate module.
@@ -227,8 +229,50 @@ usage is discouraged.
 ### Statement types
 
 ##### Comments
-Lines starting with double slashes (//) or a number sign (#) are
-comments and are ignored (i.e. they are thrown away while parsing).
+Lines starting with double slashes (//) are comments and are ignored
+(i.e. they are thrown away while parsing).
+
+##### Directives
+Lines starting with a number sign (#) are directives. There are several
+special directives which preprocessor recognizes:
+
+#include {file} copies contents of {file} to current file. The file is
+resolved relative to the source directory (as defined by FileProvider).
+Maximum number of #include levels is 32.
+
+#define {A} \[{B}] defines substitutions. If {B} isn't provided, the
+directive is equal to #define {A} {A}. It is used to define substitutions
+in code. It substitutes token A with string B (B can have spaces). Tokens
+in this context refer to parts of source file split by space (' '),
+parentheses ('(' and ')'), brackets ('\[' and ']'), question mark ('?'),
+colon (':'), greater than sign ('>') or exclamation point ('!').
+
+#undef {A} undefines substitution {A}, so it isn't performed anymore.
+
+#ifdef {A} starts a conditional block which is preprocessed and compiled
+only if {A} is a defined substitution.
+
+#ifndef {A} starts a conditional block which is preprocessed and compiled
+only if {A} isn't a defined substitution.
+
+#if {A} starts a conditional block which is preprocessed and compiled
+only if {A} is satisfied, where {A} is an expression which takes
+variable from both book state and substitutions defined by #define. If
+there is a both a variable and a substitution with the same name,
+substitution has precedence.
+
+#endif ends a conditional block
+
+#error raises a TriggerPreprocessorError exception
+
+#require {A} raises a RequireNotSatisfied exception if {A} isn't
+satisfied. {A} is an expression defined the same way as {A} in #if
+directive.
+
+Non-preprocessor directives are attached to the following line and can
+be obtained by Line#getDirectives, as well as be found in source code.
+Directives can use any character, but preprocessor directives are
+guaranteed to start with an alphabetic character.
 
 ##### Statement block marker
 Lines which equal three colons (i.e. :::) are statement block markers.
@@ -248,7 +292,10 @@ Their body is evaluated, and if the result is truthy, execution carries
 on to the next line. If the result is falsy, execution jumps to the next
 line with the same or less indent. Body of the if-statement (i.e.
 statements which are executed only if the result is truthy) _must_ have
-indent larger than that of the if-statement.
+indent larger than that of the if-statement. If-statements can be found
+inside questions, in which case the body must consist solely of
+answers or other if-statements. In that case, if if-statement is
+fulfilled, the answer is displayed to the user.
 
 Procedural statements ending with a colon (:) are labels and mark a
 certain place in code. They are no-ops.
@@ -259,10 +306,13 @@ jump to next return-statement. When reached by goto, they memorize
 the goto from which the jump was made.
 
 Procedural statements starting with a greater than sign (>, i.e. :>)
-are goto-statements. Body of a goto-statement _must_ be a label. When
+are goto-statements. Body of a goto-statement _must_ contain a label. When
 execution reaches a goto-statement, it is redirected to the label and
 continues from there on. In case there is no label with the name
 designated by a goto-statement an InterpretationException is thrown.
+Body of a goto-statement can optionally consist of a condition, followed
+by a question mark (?), followed by a label name. In this case, the jump
+is executed iff the condition is fulfilled.
 
 Procedural statement equalling two greater then signs (i.e. :>>) is a
 return-statement. They _must_ follow a procedural label. When reached,
@@ -274,11 +324,14 @@ All other procedural statements are evaluated as assign-statements.
 Assign-statements are a comma-separated list of assignments.
 Assignments are split on the first equals (=) sign. First part
 represents a variable name and the second an expression to be
-evaluated. First part _must_ be a valid variable name, otherwise an
-InterpretationException is thrown. In case there are no equals signs
-in the assign-statement body, expression is set to empty string.
-At runtime, the expression is evaluated, and it is stored into the
-appropriately named variable.
+evaluated. First part _must_ be a valid variable name, optionally with
+a leading exclamation point ('!'), otherwise an InterpretationException
+is thrown. In case there are no equals signs in the assign-statement
+body, expression is set to empty string. At runtime, the expression is
+evaluated, and it is stored into the appropriately named variable.
+Assignments whose variables are preceded by an exclamation points are
+undeclarations, i.e. after they are executed variable is removed from
+the state. Undeclarations cannot contain an equals sign.
 
 ##### Halt
 Lines which equal ;; are unconditional halts. They end the current
@@ -349,21 +402,19 @@ be able to handle all lengths.
 All other lines are treated as narratives and are displayed to the user
 as such.
 
+### Variable substitution
 
-//todo whitespace rules inside statements (usually ignored)
+Inside questions, answers, speech and narrative, variable substitution
+is performed. Variable substitution refers to a process in which every
+variable name enclosed in square brackets is replaced with that
+variable's value. In case variable with such name doesn't exist, the
+square brackets are taken literally. So, when using state which contains
+variable five set to 5, line `Explain it to me like I'm [five]` would
+show as a narrative with text `Explain to to me like I'm 5`.
 
-//todo escaping, variable substitution
 
-//todo conditional goto
 
-//todo procedures, and god knows what else I've added in the meantime
-
-//todo # directives
-
-//todo conditional answers, undeclaring variables
-## Interpretation rules
-
-//todo
+//todo whitespace rules inside statements (usually ignored), escaping
 
 ## License
 
