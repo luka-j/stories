@@ -157,7 +157,9 @@ public class State implements VariableProvider {
         List<String> vars = Utils.readAllLines(file);
         variables = new HashMap<>();
         for(String var : vars) {
+            if(var.isEmpty()) continue;
             String[] fields = var.split(SEP, 2);
+            if(fields.length < 2) continue;
             Value val = new Value(fields[1]);
             variables.put(fields[0], val);
         }
