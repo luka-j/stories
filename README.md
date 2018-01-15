@@ -3,7 +3,7 @@
 
 [![](https://jitpack.io/v/luq-0/stories.svg)](https://jitpack.io/#luq-0/stories)
 
-_Looking for Android special variables? See [here](https://github.com/luq-0/stories/android-vars.md)_
+_Looking for Android special variables? See [here](https://github.com/luq-0/stories/blob/master/android-vars.md)_
 
 For early and probably confusing sneak peek look at books/sample.
 This project consists of a [exp4j](https://github.com/luq-0/exp4j) fork
@@ -31,7 +31,7 @@ programs to be written, in form of conversational interfaces.
 
 This project is packaged as a Java library, not targeting any particular
 environment. The aim of this project _isn't_ to provide a full implementation
-for any environment, but rather to define the language and implement a
+for any environment, but rather to define the language and implement an
 environment-agnostic interpreter. There is, however, a minimal debug
 implementation targeting a specific Linux setup executed from a console
 defined by `.runtime.DebugExecution`, `.environment.BasicTerminalDisplay`
@@ -57,7 +57,7 @@ Main point of entry for this library is the `.runtime.Runtime` class.
 
 ## Exceptions
 
-There are four types of exceptions which can be raised, residing in the
+There are four main types of exceptions which can be raised, residing in the
 `.exceptions` package.
 
 LoadingException is thrown in case the book can't be loaded. This occurs
@@ -412,6 +412,24 @@ square brackets are taken literally. So, when using state which contains
 variable five set to 5, line `Explain it to me like I'm [five]` would
 show as a narrative with text `Explain to to me like I'm 5`.
 
+## Parsing and execution
+
+When compiling the chapter, it first resolves the given source file
+using FileProvider associated with the chapter and loads it all into a
+list of Strings, where each entry represents one line. That list is then
+first passed to the Preprocessor, which handles the # directives.
+After that, List modified in such way is passed to Parser.
+
+Output of the parser is a single Line, representing an entry point to
+the chapter. Each line has `nextLine` attribute, and optionally an
+alternative path such as `endIf` in if-statement or `jumpTo` in
+goto-statement. In case of if-statement, `nextLine` is taken if the
+condition is fulfilled, and `endIf` is taken otherwise; in case of
+goto-statement, `jumpTo` is always taken. Line has the `Line#execute`
+method which should be used to execute the line and return the next
+one which should be executed. In case traversing the source is desired,
+`Line#getNextLine` can be used. The execution tree is essentially a
+linked list with branches, so to allow the full traversal of the source.
 
 
 //todo whitespace rules inside statements (usually ignored), escaping
