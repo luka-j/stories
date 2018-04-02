@@ -448,4 +448,8 @@ public class State implements VariableProvider {
     public boolean hasVariable(String name) {
         return variables.containsKey(name);
     }
+
+    public boolean hasAssignedVariable(String name) {
+        return hasVariable(name) && variables.get(name).type != Type.NULL;
+    }
 }

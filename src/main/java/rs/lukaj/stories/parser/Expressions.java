@@ -165,7 +165,7 @@ public class Expressions {
             else return 0;
         }
 
-        if(sides.length == 2 && !state.isNumeric(sides[0]) && state.hasVariable(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
+        if(sides.length == 2 && !state.isNumeric(sides[0]) && state.hasAssignedVariable(sides[0]) && state.getString(sides[0]).equals(sides[1])) {
             return negation ? 0 : 1;
             //the idea is to support expressions such as q=ans where ans is a variable, and q
             //is supposed to have the value ans
@@ -173,21 +173,26 @@ public class Expressions {
         }
         StringBuilder rhs = new StringBuilder();
         String var;
-        for(String str : rvars)
-            if((var=state.getString(str)) != null)
+        boolean allVarsAssigned = true;
+        for(String varName : rvars)
+            if((var=state.getString(varName)) != null) {
                 rhs.append(var);
-            else
-                rhs.append(str);
+                if(!state.hasAssignedVariable(varName)) allVarsAssigned = false;
+            } else {
+                rhs.append(varName);
+            }
         if(sides.length == 1) return rhs.toString();
         else {
             StringBuilder lhs = new StringBuilder();
             String[] lvars = sides[0].split("\\s*\\+\\s*");
-            for(String str : lvars)
-                if((var=state.getString(str)) != null)
+            for(String varName : lvars)
+                if((var=state.getString(varName)) != null) {
                     lhs.append(var);
-                else
-                    lhs.append(str);
-            boolean ret = rhs.toString().equals(lhs.toString());
+                    if(!state.hasAssignedVariable(varName)) allVarsAssigned = false;
+                } else {
+                    lhs.append(varName);
+                }
+            boolean ret = allVarsAssigned && rhs.toString().equals(lhs.toString());
             if(ret ^ negation) return 1;
             else return 0;
         }

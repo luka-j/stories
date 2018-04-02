@@ -28,4 +28,14 @@ Your result is [ordinal]
    Hey, I look like a procedure (who am I kidding?)
 :>>
 
+:a=asdf, b, c
+:a=b?
+    You shouldn't see this (asdf != null)
+:b?
+    You shouldn't see this (b is undeclared)
+:b=c?
+    You shouldn't see this (null != null)
+:a=asdf?
+    Bye bye!
+
 #include include.ch

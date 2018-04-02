@@ -116,6 +116,8 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
+            //todo really fix this below, also fix bug that doesn't allow parens in narrative questions
+            //also fix narrative questions not to require :
             if (!line.contains(":"))
                 line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in questions
 
