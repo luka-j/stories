@@ -13,6 +13,9 @@ This is \//not a comment //this is, though, because backslash is usually an esca
 //we need to declare characters before using them; colon denotes a procedural statement
 character : Well hello there
 
+?  [narr]  Look at me, I'm a ghost question (jk)
+   *[ans] Woo!
+
 ::: //three colons denote the start of a statement block: everything following with larger indent,
     //except comments, is treated as a statement
     res=sqrt(10)+3

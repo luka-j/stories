@@ -62,8 +62,8 @@ public class Utils {
         return sb.toString();
     }
 
-    public static String between(String str, char begin, char end) {
-        int b=0, e;
+    public static String between(String str, char begin, char end, int startFrom) {
+        int b=startFrom, e;
         while(b<str.length() && str.charAt(b) != begin) b++;
         b++;
         if(b>=str.length()) return null;
@@ -71,6 +71,9 @@ public class Utils {
         while(e<str.length() && str.charAt(e) != end) e++;
         if(e == str.length()) return null;
         return str.substring(b, e);
+    }
+    public static String between(String str, char begin, char end) {
+        return between(str, begin, end, 0);
     }
 
     public static final Comparator<String> enumeratedStringsComparator = (o1, o2) -> {

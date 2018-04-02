@@ -116,20 +116,49 @@ public enum LineType {
         @Override
         public Line parse(String line, int lineNumber, int indent, Chapter chapter)
                 throws InterpretationException {
-            //todo really fix this below, also fix bug that doesn't allow parens in narrative questions
-            //also fix narrative questions not to require :
-            if (!line.contains(":"))
-                line = line + ":"; //todo fix this, make shared code for narrative/speech and recognizing it in questions
-
             String[] parts = line.substring(1).split("\\s*:\\s*", 2);
-            String text = parts[1];
-            String var = Utils.between(parts[0], '[', ']');
-            String time = Utils.between(parts[0], '(', ')');
-            String charName;
-            if (parts[0].indexOf("]") > parts[0].indexOf(")"))
-                charName = Utils.between(line, ']', ':');
-            else
-                charName = Utils.between(line, ')', ':');
+            String text, var = null, time = null, charName;
+            if(parts.length == 2) {
+                text = parts[1];
+                var = Utils.between(parts[0], '[', ']');
+                time = Utils.between(parts[0], '(', ')');
+                if (parts[0].indexOf("]") > parts[0].indexOf(")"))
+                    charName = Utils.between(line, ']', ':');
+                else
+                    charName = Utils.between(line, ')', ':');
+            } else {
+                String s = parts[0].trim();
+                charName = "";
+                int textBegin = 0;
+                if(s.charAt(0) == '(') {
+                    int timeClosing = s.indexOf(')');
+                    if(timeClosing > 0)
+                        time = s.substring(1, timeClosing);
+                    int varOpening = timeClosing > 0 ? timeClosing : 0;
+                    while(varOpening < s.length() && Character.isWhitespace(s.charAt(++varOpening)))
+                        ;
+                    if(varOpening < s.length() && s.charAt(varOpening) == '[') {
+                        textBegin = s.indexOf(']')+1;
+                        var = s.substring(varOpening+1, textBegin-1);
+                    } else {
+                        textBegin = varOpening+1;
+                    }
+                } else if(s.charAt(0) == '[') {
+                    int varClosing = s.indexOf(']');
+                    if(varClosing > 0)
+                        var = s.substring(1, varClosing);
+                    int timeOpening = varClosing > 0 ? varClosing : 0;
+                    while(timeOpening < s.length() && Character.isWhitespace(s.charAt(++timeOpening)))
+                        ;
+                    if(timeOpening < s.length() && s.charAt(timeOpening) == '(') {
+                        textBegin = s.indexOf(')') + 1;
+                        time = s.substring(timeOpening+1, textBegin-1);
+                    } else {
+                        textBegin = timeOpening+1;
+                    }
+                }
+                text = s.substring(textBegin, s.length());
+            }
             if (time != null) time = time.trim();
             if (var == null) throw new InterpretationException("Variable name for question is empty");
             charName = charName.trim(); //this shouldn't be null (both ] and : must exist, otherwise NPE would be thrown earlier)
