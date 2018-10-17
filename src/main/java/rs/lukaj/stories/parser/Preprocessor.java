@@ -155,7 +155,7 @@ public class Preprocessor {
             if(tokenBreakChars.contains(ch)) {
                 if(buff.length() > 0) {
                     String append = buff.toString();
-                    res.append(defines.getOrDefault(append, append));
+                    res.append(Utils.getOrDefault(defines, append, append));
                     buff.delete(0, buff.length());
                 }
                 res.append(ch);
@@ -165,7 +165,7 @@ public class Preprocessor {
         }
 
         String append = buff.toString();
-        res.append(defines.getOrDefault(append, append));
+        res.append(Utils.getOrDefault(defines, append, append));
 
         return res.toString();
     }

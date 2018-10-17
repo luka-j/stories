@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -107,5 +108,12 @@ public class Utils {
         String line;
         while((line=reader.readLine()) != null) lines.add(line);
         return lines;
+    }
+
+    public static <K,V> V getOrDefault(Map<K, V> map, K key, V def) {
+        if(map.containsKey(key))
+            return map.get(key);
+        else
+            return def;
     }
 }
