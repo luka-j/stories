@@ -1,5 +1,5 @@
 group 'rs.lukaj'
-version '0.11.0-alpha'
+version '0.12.3-beta'
 
 apply plugin: 'java'
 apply plugin: 'application'
